@@ -1,0 +1,27 @@
+{
+  "name": "convert-and-seed-audio",
+  "version": "0.0.1",
+  "description": "gets an audio file, and seeds alternative formats",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArtskydJ/convert-and-seed-audio.git"
+  },
+  "author": "Joseph Dykstra",
+  "license": "VOL",
+  "bugs": {
+    "url": "https://github.com/ArtskydJ/convert-and-seed-audio/issues"
+  },
+  "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
+  "dependencies": {
+    "musicmetadata": "^0.6.1",
+    "socket.io": "^1.2.1",
+    "sox-stream": "^0.1.1",
+    "webtorrent": "^0.16.0",
+    "xtend": "^4.0.0"
+  }
+}

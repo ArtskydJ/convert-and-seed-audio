@@ -1,0 +1,7 @@
+node_modules/*
+database/*
+public/bundle.js
+public/.bundle.js
+converted/*
+sox/*
+*.log
