@@ -2,8 +2,14 @@ var http = require('http')
 var crypto = require('crypto')
 var Socket = require('socket.io')
 var WebTorrent = require('webtorrent')
+var sox = require('sox-stream')
+var xtend = require('xtend')
+var path = require('path')
 var Convertor = require('./convert.js')
-var announce = [ "wss://tracker.webtorrent.io" ] //put this in a config?
+
+//configuration
+var announce = [ "wss://tracker.webtorrent.io" ]
+var formats = ['mp3', 'ogg']
 
 config.ecstatic.root = process.cwd() + config.ecstatic.root
 var serve = Ecstatic(config.ecstatic)
@@ -15,26 +21,36 @@ var torrenter = new WebTorrent()
 var upcomingSongs = [] //playing and upcoming
 server.listen(80)
 
-io.sockets.on('connect', function co(socket) {
-	socket.on('upload', function up(stream, meta, fnReturn) {
-		console.log('on upload')
-		convert(stream, meta, function (err, tagData, mp3Stream, oggStream) {
-			console.log('done converting,', err)
-			if (!err) {
-				//torrenter.seed(mp3)
-				//torrenter.seed(ogg)
-				//get both infohashes
-				//give em to the client
-				stream.pipe(crypto.createHash('md5'))
-					.on('finish', function (md5) {
-						var songId = 'songid_' + md5.toString('hex')
-						console.log(songId)
-						fnReturn(songId, tagData, mp3Ih, oggIh) //bad idea?
-					})
-			}
+function onTorrent(torrent, cb) {
+	console.log('on torrent')
+	var file = torrent.files[0]
+	if (file) {
+		var stream = file.createReadStream()
+		var mp3Stream = convert('mp3', file.name, stream)
+		var oggStream = convert('ogg', file.name, stream)
+
+		var streams = formats.map(function (format) {
+			return convert(format, file.name, stream)
 		})
-	})
-})
+
+		//torrenter.seed(mp3)
+		//torrenter.seed(ogg)
+		//get both infohashes
+		//give em to the client
+	}
+}
+
+function convert(toExt, filename, stream) { //not meta
+	var opts = xtend( config.presets[newType], { type: newType })
+
+	return isExtension(toExt, filename) ?
+		stream : stream.pipe( sox(opts) )
+}
+
+function isExtension(ext1, filename) {
+	var ext2 = path.extname(filename)
+	return ext1.toLowerCase() === ext2.toLowerCase()
+}
 
 //get rid of socket.io if possible
 //implement webtorrent
