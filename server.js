@@ -1,5 +1,5 @@
 var crypto = require('crypto')
-var Server = require('socket.io')
+var SocketIo = require('socket.io')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
@@ -12,7 +12,7 @@ var createTempFile = require('create-temp-file')
 var announce = [ "wss://tracker.webtorrent.io" ]
 var formats = ['mp3', 'ogg']
 
-var io = new Server()
+var io = new SocketIo()
 //var tags = Tags()
 var torrenter = new WebTorrent()
 
