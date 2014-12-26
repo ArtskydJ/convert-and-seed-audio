@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
+    "async-each": "^0.1.6",
     "musicmetadata": "^0.6.1",
+    "onetime": "^1.0.0",
     "socket.io": "^1.2.1",
     "sox-stream": "^0.1.6",
     "webtorrent": "^0.16.0",
