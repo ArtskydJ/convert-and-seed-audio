@@ -1,4 +1,4 @@
-var TEST = !!process.env.test
+var TEST = process.env.test
 var crypto = require('crypto')
 var SocketIo = TEST ?
 	require('mock-socket.io').Server :

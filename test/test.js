@@ -2,15 +2,11 @@ var test = require('tap').test
 var SocketIo = require('mock-socket.io').Client
 var Webtorrent = require('webtorrent')
 var cp = require('child_process')
-//var thruMap = require("through2-map")
 
 process.env.test = true
 var torrenter = new Webtorrent()
 
 test('ogg file', {timeout:Infinity}, function (t) {
-	//spawnServer()
-
-	//var io = SocketIo('http://localhost/')
 	var io = new SocketIo(require('../'))
 	var originalInfoHash = ''
 
@@ -44,8 +40,6 @@ test('ogg file', {timeout:Infinity}, function (t) {
 })
 
 test('wav file', {timeout:60000}, function (t) {
-	//spawnServer()
-	//var io = SocketIo('http://localhost:8080/')
 	var io = new SocketIo(require('../'))
 	var originalInfoHash = ''
 
