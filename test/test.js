@@ -4,22 +4,8 @@ var Webtorrent = require('webtorrent')
 var cp = require('child_process')
 //var thruMap = require("through2-map")
 
+process.env.test = true
 var torrenter = new Webtorrent()
-
-/*
-function prepend(str) {
-	return thruMap(function (chunk) {
-		return (str || '') + chunk
-	})
-}
-
-function spawnServer() {
-	console.log('LAUNCHING SERVER')
-	var srv = cp.spawn('node', ['server.js'])
-	srv.stdout.pipe(prepend('SERVER> ')).pipe(process.stdout)
-	srv.stderr.pipe(prepend('ERROR> ')).pipe(process.stderr)
-}
-*/
 
 test('ogg file', {timeout:Infinity}, function (t) {
 	//spawnServer()

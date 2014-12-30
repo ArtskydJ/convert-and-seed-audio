@@ -20,6 +20,7 @@
   "dependencies": {
     "async-each": "^0.1.6",
     "create-temp-file": "^0.1.0",
+    "mock-socket.io": "^1.0.0",
     "musicmetadata": "^0.6.1",
     "onetime": "^1.0.0",
     "socket.io": "^1.2.1",

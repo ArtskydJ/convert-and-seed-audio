@@ -1,7 +1,7 @@
 var TEST = !!process.env.test
 var crypto = require('crypto')
 var SocketIo = TEST ?
-	require('mock-socket-io').Server :
+	require('mock-socket.io').Server :
 	require('socket.io')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
