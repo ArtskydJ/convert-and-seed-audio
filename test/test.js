@@ -1,22 +1,47 @@
 var test = require('tap').test
-var SocketIo = require('socket.io-client')
-var torrenter = require('webtorrent')
-var spawn = require('child_process').spawn
+var SocketIo = require('mock-socket.io').Client
+var Webtorrent = require('webtorrent')
+var cp = require('child_process')
+//var thruMap = require("through2-map")
 
-function spawnServer() {
-	spawn('node', ['server.js'], {cwd:'..'})
+var torrenter = new Webtorrent()
+
+/*
+function prepend(str) {
+	return thruMap(function (chunk) {
+		return (str || '') + chunk
+	})
 }
 
-test('ogg file', function (t) {
-	spawnServer()
-	var io = SocketIo('http://localhost/users')
+function spawnServer() {
+	console.log('LAUNCHING SERVER')
+	var srv = cp.spawn('node', ['server.js'])
+	srv.stdout.pipe(prepend('SERVER> ')).pipe(process.stdout)
+	srv.stderr.pipe(prepend('ERROR> ')).pipe(process.stderr)
+}
+*/
+
+test('ogg file', {timeout:Infinity}, function (t) {
+	//spawnServer()
+
+	//var io = SocketIo('http://localhost/')
+	var io = new SocketIo(require('../'))
 	var originalInfoHash = ''
 
 	io.on('connect', function () {
-		torrenter.seed('./audio/test_1.ogg', function (torrent) {
+		var file = __dirname + '/audio/test_1.ogg'
+		console.log('CONNECTED')
+		console.time('SEEDING #1')
+		torrenter.seed(file, function (torrent) {
+			console.timeEnd('SEEDING #1')
 			originalInfoHash = torrent.infoHash
-			io.emit('upload')
+			io.emit('upload', originalInfoHash)
 		})
+	})
+
+	io.on('error', function (err) {
+		t.fail(err.message || 'socket.io error')
+		t.end()
 	})
 
 	io.on('hashes', function (err, infoHashes) {
@@ -25,15 +50,21 @@ test('ogg file', function (t) {
 		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
 		t.end()
 	})
+
+	io.on('disconnect', function () {
+		console.log('DISCONNECT')
+		t.end()
+	})
 })
 
-test('wav file', function (t) {
-	spawnServer()
-	var io = SocketIo('http://localhost/users')
+test('wav file', {timeout:60000}, function (t) {
+	//spawnServer()
+	//var io = SocketIo('http://localhost:8080/')
+	var io = new SocketIo(require('../'))
 	var originalInfoHash = ''
 
 	io.on('connect', function () {
-		torrenter.seed('./audio/test_2.wav', function (torrent) {
+		torrenter.seed(__dirname + '/audio/test_2.wav', function (torrent) {
 			originalInfoHash = torrent.infoHash
 			io.emit('upload')
 		})

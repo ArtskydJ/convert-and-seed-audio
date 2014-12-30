@@ -1,5 +1,8 @@
+var TEST = !!process.env.test
 var crypto = require('crypto')
-var SocketIo = require('socket.io')
+var SocketIo = TEST ?
+	require('mock-socket-io').Server :
+	require('socket.io')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
@@ -12,21 +15,31 @@ var createTempFile = require('create-temp-file')
 var announce = [ "wss://tracker.webtorrent.io" ]
 var formats = ['mp3', 'ogg']
 
-var io = new SocketIo()
 //var tags = Tags()
 var torrenter = new WebTorrent()
+var io = new SocketIo(80)
+if (TEST) module.exports = io
 
 var upcomingSongs = [] //playing and upcoming
-server.listen(80)
 
 io.on('connect', function (socket) {
-	socket.on('upload', onUpload(function (err, hashes) {
-		if (!err) socket.emit('hashes', hashes)
+	console.log('CONNECTED')
+
+	socket.on('upload', onUpload(function finished(err, hashes) {
+		err ?
+			socket.emit('hashes', hashes) :
+			console.error('upload error: ' + err.message)
 	}))
+
+	socket.on('disconnect', function () {
+		console.log('DISCONNECT')
+	})
 })
 
 function onUpload(done) {
 	return function ou(infHsh) {
+		var n = Number(infHsh[0] !== 'c') + 1
+		console.log('DOWNLOADING #' + n)
 		torrenter.download(infHsh, function onTorrent(torrent) {
 			console.log('on torrent')
 			var file = torrent.files[0]
@@ -36,17 +49,18 @@ function onUpload(done) {
 			} else {
 				done(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
 			}
-		}
+		})
 	}
 }
 
-function uploadFormat(filename, stream)
+function uploadFormat(filename, stream) {
 	return function uf(format, next) {
+		console.log('CONVERTING')
 		var tmpFile = createTempFile()
 		var converted = convert(format, filename, stream)
 		if (converted) {
 			converted.pipe(tmpFile).on('finish', function () {
-				var newTorrent = torrenter.seed(tmpFile.path, function () {}) //skip the noop?
+				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
 				next(null, newTorrent.infoHash)
 			})
 		} else {
@@ -57,7 +71,7 @@ function uploadFormat(filename, stream)
 	}
 }
 
-function convert(toExt, filename, stream) { //not meta
+function convert(toExt, filename, stream) {
 	var opts = xtend( config.presets[newType], { type: newType })
 
 	return isExtension(toExt, filename) ?
