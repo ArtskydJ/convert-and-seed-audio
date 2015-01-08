@@ -1,16 +1,21 @@
-var test = require('tap').test
-var SocketIo = require('mock-socket.io').Client
+var TEST_MODE = false
+process.env.test = TEST_MODE
+var test = require('tape').test
+var Dnode = require('dnode')
+var Shoe = require('shoe')
 var Webtorrent = require('webtorrent')
-var cp = require('child_process')
 
-process.env.test = true
-var torrenter = new Webtorrent()
+function append(str) { document.getElementById('log').innerHTML += str }
+console.log =   function (str) { append(str + '\n') }
+console.error = function (str) { append('<b>ERROR!</b> ' + str + '\n') }
 
-test('ogg file', {timeout:Infinity}, function (t) {
-	var io = new SocketIo(require('../'))
+test('ogg file', { timeout: Infinity }, function (t) {
+	var d = Dnode()
+	var stream = Shoe('/dnode')
+	var torrenter = new Webtorrent()
 	var originalInfoHash = ''
 
-	io.on('connect', function () {
+	d.on('remote', function (remote) {
 		var file = __dirname + '/audio/test_1.ogg'
 		console.log('CONNECTED')
 		console.time('SEEDING #1')
@@ -19,28 +24,28 @@ test('ogg file', {timeout:Infinity}, function (t) {
 			originalInfoHash = torrent.infoHash
 			io.emit('upload', originalInfoHash)
 		})
-	})
 
-	io.on('error', function (err) {
-		t.fail(err.message || 'socket.io error')
-		t.end()
-	})
+		remote.connected() //tell the server that you're connected
 
-	io.on('hashes', function (err, infoHashes) {
-		t.notOk(err, err? err.message : 'no error')
-		t.equal(infoHashes.length, 2, '2 info hashes returned')
-		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
-		t.end()
+		remote.hashes(function (err, infoHashes) {
+			t.notOk(err, err? err.message : 'no error')
+			t.equal(infoHashes.length, 2, '2 info hashes returned')
+			t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
+			t.end()
+		})
 	})
+	d.pipe(stream).pipe(d)
 
-	io.on('disconnect', function () {
-		console.log('DISCONNECT')
+	d.on('error', function (err) {
+		t.fail(err.message || 'dnode error')
 		t.end()
 	})
 })
 
-test('wav file', {timeout:60000}, function (t) {
-	var io = new SocketIo(require('../'))
+test('wav file', { timeout: 60 * 1000 }, function (t) {
+	var d = Dnode()
+	var stream = Shoe('/dnode')
+	var torrenter = new Webtorrent()
 	var originalInfoHash = ''
 
 	io.on('connect', function () {
@@ -48,12 +53,12 @@ test('wav file', {timeout:60000}, function (t) {
 			originalInfoHash = torrent.infoHash
 			io.emit('upload')
 		})
-	})
 
-	io.on('hashes', function (err, infoHashes) {
-		t.notOk(err, err? err.message : 'no error')
-		t.equal(infoHashes.length, 2, '2 info hashes returned')
-		t.equal(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
-		t.end()
+		remote.hashes(function (err, infoHashes) {
+			t.notOk(err, err? err.message : 'no error')
+			t.equal(infoHashes.length, 2, '2 info hashes returned')
+			t.equal(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
+			t.end()
+		})
 	})
 })

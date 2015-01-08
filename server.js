@@ -1,15 +1,15 @@
-var TEST = process.env.test
+var TEST_MODE = !!process.env.test
 var crypto = require('crypto')
-var SocketIo = TEST ?
-	require('mock-socket.io').Server :
-	require('socket.io')
+var http = require('http')
+var Shoe = require('shoe')
+var Dnode = require('dnode')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
+var ecstatic = require('ecstatic')
 var createTempFile = require('create-temp-file')
-//var Tags = require('./get-tag-data.js')
 
 //configuration
 var announce = [ "wss://tracker.webtorrent.io" ]
@@ -17,26 +17,31 @@ var formats = ['mp3', 'ogg']
 
 //var tags = Tags()
 var torrenter = new WebTorrent()
-var io = new SocketIo(80)
-if (TEST) module.exports = io
+if (TEST_MODE) module.exports = io
 
 var upcomingSongs = [] //playing and upcoming
 
-io.on('connect', function (socket) {
-	console.log('CONNECTED')
+var inNodeWebkit = !!process.env.node
+if (inNodeWebkit) {
+	function append(str) { document.getElementById('log').innerHTML += str }
+	console.log =   function (str) { append(str + '<br>') }
+	console.error = function (str) { append('<b>ERROR!</b> ' + str + '<br>') }
+}
+console.log('Test mode: ' + TEST_MODE)
+console.log('Navigate to http://localhost:9999/')
 
-	socket.on('upload', onUpload(function finished(err, hashes) {
-		err ?
-			socket.emit('hashes', hashes) :
-			console.error('upload error: ' + err.message)
-	}))
-
-	socket.on('disconnect', function () {
-		console.log('DISCONNECT')
+var server = http.createServer(ecstatic({root:__dirname}))
+server.listen(9999)
+var sock = Shoe(function (stream) {
+	var d = Dnode({
+		connect: console.log.bind(null, 'CONNECTED'),
+		upload: upload
 	})
+	d.pipe(stream).pipe(d)
 })
+sock.install(server, '/dnode')
 
-function onUpload(done) {
+function upload(done) {
 	return function ou(infHsh) {
 		var n = Number(infHsh[0] !== 'c') + 1
 		console.log('DOWNLOADING #' + n)
@@ -58,24 +63,21 @@ function uploadFormat(filename, stream) {
 		console.log('CONVERTING')
 		var tmpFile = createTempFile()
 		var converted = convert(format, filename, stream)
-		if (converted) {
+		converted ?
 			converted.pipe(tmpFile).on('finish', function () {
-				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
+				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop? why the arr?
 				next(null, newTorrent.infoHash)
 			})
-		} else {
+		:
 			process.nextTick(function () {
-				next(torrent.infoHash)
+				next(null, torrent.infoHash)
 			})
-		}
 	}
 }
 
 function convert(toExt, filename, stream) {
 	var opts = xtend( config.presets[newType], { type: newType })
-
-	return isExtension(toExt, filename) ?
-		stream : stream.pipe( sox(opts) )
+	return isExtension(toExt, filename) ? stream : stream.pipe( sox(opts) )
 }
 
 function isExtension(ext1, filename) {
