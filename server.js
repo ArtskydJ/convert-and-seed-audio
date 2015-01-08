@@ -1,8 +1,11 @@
-var TEST = process.env.test
 var crypto = require('crypto')
-var SocketIo = TEST ?
-	require('mock-socket.io').Server :
-	require('socket.io')
+var EventEmitter = require('events').EventEmitter
+if (!process.env.test) {
+	var shoe = require('shoe')
+	var http = require('http')
+	var emitStream = require('emit-stream')
+	var JSONStream = require('JSONStream')
+}
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
@@ -17,39 +20,43 @@ var formats = ['mp3', 'ogg']
 
 //var tags = Tags()
 var torrenter = new WebTorrent()
-var io = new SocketIo(80)
-if (TEST) module.exports = io
+var emitter = new EventEmitter
+if (!process.env.test) {
+	var sock = shoe(function (stream) {
+		emitStream(emitter)
+			.pipe(JSONStream.stringify())
+			.pipe(stream)
+	})
+	var server = http.createServer()
+	server.listen(8080)
+	sock.install(server, '/socket')
+} else { //test
+	module.exports = emitter
+	emitter.on('test_shut_down', function tsd() {
+		torrenter.destroy()
+	})
+}
 
 var upcomingSongs = [] //playing and upcoming
 
-io.on('connect', function (socket) {
-	console.log('CONNECTED')
-
-	socket.on('upload', onUpload(function finished(err, hashes) {
+emitter.on('upload', function (infHsh, cb) {
+	torrenter.download(infHsh, onTorrent(function finished(err, hashes) {
 		err ?
-			socket.emit('hashes', hashes) :
+			emitter.emit('hashes', hashes) :
 			console.error('upload error: ' + err.message)
 	}))
-
-	socket.on('disconnect', function () {
-		console.log('DISCONNECT')
-	})
 })
 
-function onUpload(done) {
-	return function ou(infHsh) {
-		var n = Number(infHsh[0] !== 'c') + 1
-		console.log('DOWNLOADING #' + n)
-		torrenter.download(infHsh, function onTorrent(torrent) {
-			console.log('on torrent')
-			var file = torrent.files[0]
-			if (file) {
-				var stream = file.createReadStream()
-				each(formats, uploadFormat(file.name, stream), done)
-			} else {
-				done(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
-			}
-		})
+function onTorrent(cb) {
+	return function ot(torrent) {
+		console.log('on torrent')
+		var file = torrent.files[0]
+		if (file) {
+			var stream = file.createReadStream()
+			each(formats, uploadFormat(file.name, stream), cb)
+		} else {
+			cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
+		}
 	}
 }
 

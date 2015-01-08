@@ -1,59 +1,80 @@
-var test = require('tap').test
-var SocketIo = require('mock-socket.io').Client
+var test = require('tape')
 var Webtorrent = require('webtorrent')
-var cp = require('child_process')
-
 process.env.test = true
-var torrenter = new Webtorrent()
 
-test('ogg file', {timeout:Infinity}, function (t) {
-	var io = new SocketIo(require('../'))
+test('ogg file', function (t) { //Infinity
+	var webtorr = new Webtorrent()
+	var emitter = {on:function(){},emit:function(){}}//require('../')
 	var originalInfoHash = ''
 
-	io.on('connect', function () {
-		var file = __dirname + '/audio/test_1.ogg'
-		console.log('CONNECTED')
-		console.time('SEEDING #1')
-		torrenter.seed(file, function (torrent) {
-			console.timeEnd('SEEDING #1')
-			originalInfoHash = torrent.infoHash
-			io.emit('upload', originalInfoHash)
-		})
+//on connect (send 'connect' event?)
+	var file = __dirname + '/audio/test_1.ogg'
+	t.pass('Connecting, Seeding #1')
+	var timeStartSeed = process.uptime()
+	webtorr.seed(file, function onSeed(torrent) {
+		t.pass(
+			'Seeding file #1, took ' +
+			(process.uptime() - timeStartSeed) +
+			' seconds.'
+		)
+		originalInfoHash = torrent.infoHash
+		emitter.emit('upload', originalInfoHash)
+	})
+//on connect
+
+	emitter.on('error', function (err) {
+		t.fail(err.message || 'network error')
+		end()
 	})
 
-	io.on('error', function (err) {
-		t.fail(err.message || 'socket.io error')
-		t.end()
-	})
-
-	io.on('hashes', function (err, infoHashes) {
-		t.notOk(err, err? err.message : 'no error')
+	emitter.on('hashes', function (err, infoHashes) {
+		t.notOk(err, err ? err.message : 'no error')
 		t.equal(infoHashes.length, 2, '2 info hashes returned')
 		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
-		t.end()
+		end()
 	})
 
-	io.on('disconnect', function () {
-		console.log('DISCONNECT')
+	function end() {
+		clearTimeout(timeoutId)
+		emitter.emit('test_shut_down')
+		webtorr.destroy()
 		t.end()
-	})
+	}
+
+	var timeoutId = setTimeout(function tmt() {
+		t.fail('timeout')
+		end()
+	}, 2 * 6+0 * 1000) //2 min
 })
 
-test('wav file', {timeout:60000}, function (t) {
-	var io = new SocketIo(require('../'))
+/*test('wav file', {timeout:60000}, function (t) {
+	var webtorr = new Webtorrent()
+	var emitter = require('../')
 	var originalInfoHash = ''
 
-	io.on('connect', function () {
-		torrenter.seed(__dirname + '/audio/test_2.wav', function (torrent) {
-			originalInfoHash = torrent.infoHash
-			io.emit('upload')
-		})
+//on connect
+	webtorr.seed(__dirname + '/audio/test_2.wav', function (torrent) {
+		originalInfoHash = torrent.infoHash
+		emitter.emit('upload')
 	})
 
-	io.on('hashes', function (err, infoHashes) {
+	emitter.on('hashes', function (err, infoHashes) {
 		t.notOk(err, err? err.message : 'no error')
 		t.equal(infoHashes.length, 2, '2 info hashes returned')
 		t.equal(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
-		t.end()
+		end()
 	})
-})
+
+	function end() {
+		t.end()
+		webtorr.destroy()
+		clearTimeout(timeoutId)
+	}
+
+	var timeoutId = setTimeout(function tmt() {
+		t.fail('timeout')
+		end()
+	}, 2 * 60 * 1000) //2 min
+})*/
+
+
