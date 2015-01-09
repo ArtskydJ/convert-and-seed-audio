@@ -2,10 +2,11 @@
   "name": "convert-and-seed-audio",
   "version": "0.0.1",
   "description": "gets an audio file, and seeds alternative formats",
-  "main": "server.js",
+  "main": "index.html",
   "scripts": {
     "test": "tap test/*.js",
-    "start": "node server.js"
+    "prestart": "browserify test/test.js > test/testbundle.js",
+    "start": "nw ."
   },
   "repository": {
     "type": "git",
@@ -32,9 +33,7 @@
     "xtend": "^4.0.0"
   },
   "devDependencies": {
-    "mocket-io": "^0.2.3",
-    "socket.io-client": "^1.2.1",
-    "tap": "^0.4.13",
+    "tape": "^3.0.3",
     "through2-map": "^1.4.0"
   }
 }
