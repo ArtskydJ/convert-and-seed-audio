@@ -1,6 +1,6 @@
 var crypto = require('crypto')
 var EventEmitter = require('events').EventEmitter
-if (!process.env.test) {
+if (!process.env.test) { //not test
 	var shoe = require('shoe')
 	var http = require('http')
 	var emitStream = require('emit-stream')
@@ -21,7 +21,7 @@ var formats = ['mp3', 'ogg']
 //var tags = Tags()
 var torrenter = new WebTorrent()
 var emitter = new EventEmitter
-if (!process.env.test) {
+if (!process.env.test) { //not test
 	var sock = shoe(function (stream) {
 		emitStream(emitter)
 			.pipe(JSONStream.stringify())
