@@ -1,0 +1,16 @@
+{
+	"musicRoom": {
+		"ecstatic": {
+			"root": "/public",
+			"showDir": false,
+			"gzip": true
+		},
+		"socketIoUrl": "http://localhost/socketio",
+		"fileTypes": [
+			"mp3",
+			"ogg"
+		],
+		"defaultFileType": "mp3",
+		"announce": ["wss://tracker.instant.io"]
+	}
+}
