@@ -22,14 +22,17 @@
     "JSONStream": "^0.10.0",
     "async-each": "^0.1.6",
     "create-temp-file": "^0.1.0",
+    "domready": "^1.0.7",
+    "drag-drop": "^2.0.0",
     "ecstatic": "^0.5.8",
     "emit-stream": "^0.1.2",
+    "in-browser": "^1.0.1",
     "musicmetadata": "^0.6.1",
     "onetime": "^1.0.0",
     "shoe": "0.0.15",
     "sox-stream": "^0.1.6",
     "tape": "^3.0.3",
-    "webtorrent": "^0.18.0",
+    "webtorrent": "^0.25.0",
     "xtend": "^4.0.0"
   },
   "devDependencies": {

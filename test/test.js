@@ -1,35 +1,42 @@
+//require('leaked-handles')
+
 var test = require('tape')
-var Webtorrent = require('webtorrent')
 process.env.test = true
+var SERVER = '../server.js'
+var FileTransfer = require('../lib/fileTransfer.js')
 
-test('ogg file', function (t) { //Infinity
-	var webtorr = new Webtorrent()
-	var emitter = {on:function(){},emit:function(){}}//require('../')
-	var originalInfoHash = ''
+function client(emitter) {
+	var transfer = FileTransfer()
+	emitter.on('hashes', transfer.download)
+	emitter.on('test_shut_down', transfer.shutdown)
+	return transfer.upload
+}
 
-//on connect (send 'connect' event?)
+test('ogg file', function (t) {
+	var emitter = require(SERVER)
+	var upload = client(emitter)
+	
 	var file = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')
-	var timeStartSeed = process.uptime()
-	webtorr.seed(file, function onSeed(torrent) {
-		t.pass(
-			'Seeding file #1, took ' +
-			(process.uptime() - timeStartSeed) +
-			' seconds.'
-		)
-		originalInfoHash = torrent.infoHash
+	var timeStartUpload = new Date().getTime()
+	upload(file, function onSeed(infhsh) {
+		var timeSeeding = new Date().getTime()
+		var dur = (timeSeeding - timeStartUpload) / 1000
+		t.pass('Seeding file #1, took ' + dur + ' seconds.')
+		originalInfoHash = infhsh
 		emitter.emit('upload', originalInfoHash)
 	})
-//on connect
 
 	emitter.on('error', function (err) {
 		t.fail(err.message || 'network error')
 		end()
 	})
 
-	emitter.on('hashes', function (err, infoHashes) {
+	emitter.on('hashes', function (err, infoHashes) { //this never fires...
+		var timeHashes = new Date().getTime()
+		var dur = (timeHashes - timeSeeding) / 1000
 		t.notOk(err, err ? err.message : 'no error')
-		t.equal(infoHashes.length, 2, '2 info hashes returned')
+		t.equal(infoHashes.length, 2, '2 info hashes returned, took ' + dur + ' seconds.')
 		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
 		end()
 	})
@@ -37,14 +44,16 @@ test('ogg file', function (t) { //Infinity
 	function end() {
 		clearTimeout(timeoutId)
 		emitter.emit('test_shut_down')
-		webtorr.destroy()
+		//webtorr.destroy()
+		t.pass('ending')
 		t.end()
 	}
 
 	var timeoutId = setTimeout(function tmt() {
 		t.fail('timeout')
 		end()
-	}, 2 * 6+0 * 1000) //2 min
+	}, 5 * 60 * 1000) //5 min
+	timeoutId.unref()
 })
 
 /*test('wav file', {timeout:60000}, function (t) {

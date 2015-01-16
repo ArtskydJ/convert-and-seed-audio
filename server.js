@@ -1,17 +1,16 @@
 var crypto = require('crypto')
 var EventEmitter = require('events').EventEmitter
-if (!process.env.test) { //not test
-	var shoe = require('shoe')
-	var http = require('http')
-	var emitStream = require('emit-stream')
-	var JSONStream = require('JSONStream')
-}
+var shoe = require('shoe')
+var http = require('http')
+var emitStream = require('emit-stream')
+var JSONStream = require('JSONStream')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
+var cfg = require('./lib/config.json')
 //var Tags = require('./get-tag-data.js')
 
 //configuration
@@ -21,6 +20,7 @@ var formats = ['mp3', 'ogg']
 //var tags = Tags()
 var torrenter = new WebTorrent()
 var emitter = new EventEmitter
+
 if (!process.env.test) { //not test
 	var sock = shoe(function (stream) {
 		emitStream(emitter)
@@ -33,14 +33,18 @@ if (!process.env.test) { //not test
 } else { //test
 	module.exports = emitter
 	emitter.on('test_shut_down', function tsd() {
+		//console.log('server shutting down!')
 		torrenter.destroy()
 	})
 }
 
 var upcomingSongs = [] //playing and upcoming
 
-emitter.on('upload', function (infHsh, cb) {
-	torrenter.download(infHsh, onTorrent(function finished(err, hashes) {
+emitter.on('upload', function (infHsh) {
+	torrenter.download(xtend(
+		cfg.webtorrent,
+		{infoHash: infHsh}
+	), onTorrent(function finished(err, hashes) {
 		err ?
 			emitter.emit('hashes', hashes) :
 			console.error('upload error: ' + err.message)
@@ -79,7 +83,7 @@ function uploadFormat(filename, stream) {
 }
 
 function convert(toExt, filename, stream) {
-	var opts = xtend( config.presets[newType], { type: newType })
+	var opts = xtend( cfg.presets[newType], { type: newType })
 
 	return isExtension(toExt, filename) ?
 		stream : stream.pipe( sox(opts) )
