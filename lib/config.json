@@ -1,18 +1,16 @@
 {
-	"musicRoom": {
-		"ecstatic": {
-			"root": "/public",
-			"showDir": false,
-			"gzip": true
-		},
-		"webtorrent": {
-			"announce": ["wss://tracker.webtorrent.io"]
-		},
-		"socketIoUrl": "http://localhost/socketio",
-		"fileTypes": [
-			"mp3",
-			"ogg"
-		],
-		"defaultFileType": "mp3"
-	}
+	"ecstatic": {
+		"root": "/public",
+		"showDir": false,
+		"gzip": true
+	},
+	"webtorrent": {
+		"announce": ["wss://tracker.webtorrent.io"]
+	},
+	"socketIoUrl": "http://localhost/socketio",
+	"fileTypes": [
+		"mp3",
+		"ogg"
+	],
+	"defaultFileType": "mp3"
 }
