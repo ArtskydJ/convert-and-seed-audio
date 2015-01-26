@@ -1,60 +1,64 @@
-var TEST_MODE = !!process.env.test
 var crypto = require('crypto')
+var EventEmitter = require('events').EventEmitter
+var shoe = require('shoe')
 var http = require('http')
-var Shoe = require('shoe')
-var Dnode = require('dnode')
+var emitStream = require('emit-stream')
+var JSONStream = require('JSONStream')
 var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
-var ecstatic = require('ecstatic')
 var createTempFile = require('create-temp-file')
+var cfg = require('./lib/config.json')
 
 //configuration
 var announce = [ "wss://tracker.webtorrent.io" ]
 var formats = ['mp3', 'ogg']
 
-//var tags = Tags()
 var torrenter = new WebTorrent()
-if (TEST_MODE) module.exports = io
+var emitter = new EventEmitter
+
+if (!process.env.test) { //not test
+	var sock = shoe(function (stream) {
+		emitStream(emitter)
+			.pipe(JSONStream.stringify())
+			.pipe(stream)
+	})
+	var server = http.createServer()
+	server.listen(8080)
+	sock.install(server, '/socket')
+} else { //test
+	module.exports = emitter
+	emitter.on('test_shut_down', function tsd() {
+		//console.log('server shutting down!')
+		torrenter.destroy()
+	})
+}
 
 var upcomingSongs = [] //playing and upcoming
 
-var inNodeWebkit = !!process.env.node
-if (inNodeWebkit) {
-	function append(str) { document.getElementById('log').innerHTML += str }
-	console.log =   function (str) { append(str + '<br>') }
-	console.error = function (str) { append('<b>ERROR!</b> ' + str + '<br>') }
-}
-console.log('Test mode: ' + TEST_MODE)
-console.log('Navigate to http://localhost:9999/')
-
-var server = http.createServer(ecstatic({root:__dirname}))
-server.listen(9999)
-var sock = Shoe(function (stream) {
-	var d = Dnode({
-		connect: console.log.bind(null, 'CONNECTED'),
-		upload: upload
-	})
-	d.pipe(stream).pipe(d)
+emitter.on('upload', function (infHsh) {
+	torrenter.download(xtend(
+		cfg.webtorrent,
+		{infoHash: infHsh}
+	), onTorrent(function finished(err, hashes) {
+		err ?
+			emitter.emit('hashes', hashes) :
+			console.error('upload error: ' + err.message)
+	}))
 })
-sock.install(server, '/dnode')
 
-function upload(done) {
-	return function ou(infHsh) {
-		var n = Number(infHsh[0] !== 'c') + 1
-		console.log('DOWNLOADING #' + n)
-		torrenter.download(infHsh, function onTorrent(torrent) {
-			console.log('on torrent')
-			var file = torrent.files[0]
-			if (file) {
-				var stream = file.createReadStream()
-				each(formats, uploadFormat(file.name, stream), done)
-			} else {
-				done(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
-			}
-		})
+function onTorrent(cb) {
+	return function ot(torrent) {
+		console.log('on torrent')
+		var file = torrent.files[0]
+		if (file) {
+			var stream = file.createReadStream()
+			each(formats, uploadFormat(file.name, stream), cb)
+		} else {
+			cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
+		}
 	}
 }
 
@@ -63,21 +67,24 @@ function uploadFormat(filename, stream) {
 		console.log('CONVERTING')
 		var tmpFile = createTempFile()
 		var converted = convert(format, filename, stream)
-		converted ?
+		if (converted) {
 			converted.pipe(tmpFile).on('finish', function () {
-				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop? why the arr?
+				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
 				next(null, newTorrent.infoHash)
 			})
-		:
+		} else {
 			process.nextTick(function () {
-				next(null, torrent.infoHash)
+				next(torrent.infoHash)
 			})
+		}
 	}
 }
 
 function convert(toExt, filename, stream) {
-	var opts = xtend( config.presets[newType], { type: newType })
-	return isExtension(toExt, filename) ? stream : stream.pipe( sox(opts) )
+	var opts = xtend( cfg.presets[newType], { type: newType })
+
+	return isExtension(toExt, filename) ?
+		stream : stream.pipe( sox(opts) )
 }
 
 function isExtension(ext1, filename) {

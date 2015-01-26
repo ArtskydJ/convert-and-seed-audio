@@ -19,15 +19,18 @@
   },
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
+    "JSONStream": "^0.10.0",
     "async-each": "^0.1.6",
     "create-temp-file": "^0.1.0",
-    "dnode": "^1.2.0",
+    "domready": "^1.0.7",
+    "drag-drop": "^2.0.0",
     "ecstatic": "^0.5.8",
-    "musicmetadata": "^0.6.1",
-    "onetime": "^1.0.0",
+    "emit-stream": "^0.1.2",
+    "in-browser": "^1.0.1",
     "shoe": "0.0.15",
     "sox-stream": "^0.1.6",
-    "webtorrent": "^0.18.0",
+    "tape": "^3.0.3",
+    "webtorrent": "^0.26.0",
     "xtend": "^4.0.0"
   },
   "devDependencies": {
