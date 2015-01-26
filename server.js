@@ -11,13 +11,11 @@ var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
 var cfg = require('./lib/config.json')
-//var Tags = require('./get-tag-data.js')
 
 //configuration
 var announce = [ "wss://tracker.webtorrent.io" ]
 var formats = ['mp3', 'ogg']
 
-//var tags = Tags()
 var torrenter = new WebTorrent()
 var emitter = new EventEmitter
 
