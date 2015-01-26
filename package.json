@@ -27,8 +27,6 @@
     "ecstatic": "^0.5.8",
     "emit-stream": "^0.1.2",
     "in-browser": "^1.0.1",
-    "musicmetadata": "^0.6.1",
-    "onetime": "^1.0.0",
     "shoe": "0.0.15",
     "sox-stream": "^0.1.6",
     "tape": "^3.0.3",
