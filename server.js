@@ -39,10 +39,9 @@ if (!process.env.test) { //not test
 var upcomingSongs = [] //playing and upcoming
 
 emitter.on('upload', function (infHsh) {
-	torrenter.download(xtend(
-		cfg.webtorrent,
-		{infoHash: infHsh}
-	), onTorrent(function finished(err, hashes) {
+	console.log('upload ' + infHsh)
+	torrenter.download(infHsh, cfg.webtorrent, onTorrent(function finished(err, hashes) {
+		console.log('upload done', err, hashes)
 		err ?
 			emitter.emit('hashes', hashes) :
 			console.error('upload error: ' + err.message)

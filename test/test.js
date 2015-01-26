@@ -1,5 +1,3 @@
-//require('leaked-handles')
-
 var test = require('tape')
 process.env.test = true
 var SERVER = '../server.js'
@@ -28,7 +26,7 @@ test('ogg file', function (t) {
 	})
 
 	emitter.on('error', function (err) {
-		t.fail(err.message || 'network error')
+		t.fail((err && err.message) ? err.message : 'network error')
 		end()
 	})
 
@@ -42,22 +40,22 @@ test('ogg file', function (t) {
 	})
 
 	function end() {
-		clearTimeout(timeoutId)
+		clearTimeout(to)
 		emitter.emit('test_shut_down')
-		//webtorr.destroy()
 		t.pass('ending')
 		t.end()
 	}
-
-	var timeoutId = setTimeout(function tmt() {
+	var to = setTimeout(function tmt() {
 		t.fail('timeout')
 		end()
 	}, 5 * 60 * 1000) //5 min
-	timeoutId.unref()
+	to.unref()
 })
 
-/*test('wav file', {timeout:60000}, function (t) {
-	var webtorr = new Webtorrent()
+
+
+/*
+test('wav file', {timeout:60000}, function (t) {
 	var emitter = require('../')
 	var originalInfoHash = ''
 
@@ -84,6 +82,5 @@ test('ogg file', function (t) {
 		t.fail('timeout')
 		end()
 	}, 2 * 60 * 1000) //2 min
-})*/
-
-
+})
+*/
