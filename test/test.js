@@ -13,7 +13,7 @@ function client(emitter) {
 test('ogg file', function (t) {
 	var emitter = require(SERVER)
 	var upload = client(emitter)
-	
+
 	var file = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')
 	var timeStartUpload = new Date().getTime()
@@ -30,7 +30,7 @@ test('ogg file', function (t) {
 		end()
 	})
 
-	emitter.on('hashes', function (err, infoHashes) { //this never fires...
+	emitter.on('hashes', function (err, infoHashes) { // This never fires...
 		var timeHashes = new Date().getTime()
 		var dur = (timeHashes - timeSeeding) / 1000
 		t.notOk(err, err ? err.message : 'no error')
@@ -40,16 +40,16 @@ test('ogg file', function (t) {
 	})
 
 	function end() {
-		clearTimeout(to)
+		clearTimeout(timeout)
 		emitter.emit('test_shut_down')
 		t.pass('ending')
 		t.end()
 	}
-	var to = setTimeout(function tmt() {
+	var timeout = setTimeout(function tmt() {
 		t.fail('timeout')
 		end()
 	}, 5 * 60 * 1000) //5 min
-	to.unref()
+	timeout.unref()
 })
 
 

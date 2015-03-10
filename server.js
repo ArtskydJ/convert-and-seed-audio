@@ -1,4 +1,3 @@
-var crypto = require('crypto')
 var EventEmitter = require('events').EventEmitter
 var shoe = require('shoe')
 var http = require('http')
@@ -31,7 +30,7 @@ if (!process.env.test) { //not test
 } else { //test
 	module.exports = emitter
 	emitter.on('test_shut_down', function tsd() {
-		//console.log('server shutting down!')
+		console.log('server shutting down!')
 		torrenter.destroy()
 	})
 }
@@ -43,8 +42,8 @@ emitter.on('upload', function (infHsh) {
 	torrenter.download(infHsh, cfg.webtorrent, onTorrent(function finished(err, hashes) {
 		console.log('upload done', err, hashes)
 		err ?
-			emitter.emit('hashes', hashes) :
-			console.error('upload error: ' + err.message)
+			console.error('upload error: ' + err.message) :
+			emitter.emit('hashes', hashes)
 	}))
 })
 
@@ -62,31 +61,27 @@ function onTorrent(cb) {
 }
 
 function uploadFormat(filename, stream) {
-	return function uf(format, next) {
-		console.log('CONVERTING')
+	return function uf(extension, next) {
+		console.log('Converting ' + filename + ' to a ' + extension + ' file.')
 		var tmpFile = createTempFile()
-		var converted = convert(format, filename, stream)
-		if (converted) {
-			converted.pipe(tmpFile).on('finish', function () {
-				var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
-				next(null, newTorrent.infoHash)
-			})
+		var doConvert = isExtension(filename, extension)
+		if (doConvert) {
+			convert(stream, extension)
+				.pipe(tmpFile)
+				.on('finish', function () {
+					var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
+					next(null, newTorrent.infoHash)
+				})
 		} else {
-			process.nextTick(function () {
-				next(torrent.infoHash)
-			})
+			next(torrent.infoHash)
 		}
 	}
 }
 
-function convert(toExt, filename, stream) {
-	var opts = xtend( cfg.presets[newType], { type: newType })
-
-	return isExtension(toExt, filename) ?
-		stream : stream.pipe( sox(opts) )
+function isExtension(filename, extension) {
+	return extension.toLowerCase() === path.extname(filename).toLowerCase()
 }
 
-function isExtension(ext1, filename) {
-	var ext2 = path.extname(filename)
-	return ext1.toLowerCase() === ext2.toLowerCase()
+function convert(stream, extension) {
+	return stream.pipe( sox({ type: extension }) )
 }
