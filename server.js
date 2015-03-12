@@ -16,7 +16,7 @@ var announce = [ "wss://tracker.webtorrent.io" ]
 var formats = ['mp3', 'ogg']
 
 var torrenter = new WebTorrent()
-var emitter = new EventEmitter
+var emitter = new EventEmitter()
 
 if (!process.env.test) { //not test
 	var sock = shoe(function (stream) {
