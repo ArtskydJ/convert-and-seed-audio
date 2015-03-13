@@ -1,18 +1,20 @@
 var EventEmitter = require('events').EventEmitter
-var WebTorrent = require('webtorrent')
 var sox = require('sox-stream')
 var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
-var cfg = require('./lib/config.json')
-
-//configuration
-var formats = ['mp3', 'ogg']
+var cfg = require('../config.json')
 
 module.exports = function Instance(torrenter, test) {
-	if (!torrenter) torrenter = new WebTorrent()
 	var emitter = new EventEmitter()
+
+	if (test) {
+		emitter.on('test_shut_down', function () {
+			console.log('server shutting down!')
+			torrenter.destroy()
+		})
+	}
 
 	var upcomingSongs = [] //playing and upcoming
 
@@ -26,12 +28,6 @@ module.exports = function Instance(torrenter, test) {
 		}))
 	})
 
-	if (test) {
-		emitter.on('test_shut_down', function tsd() {
-			console.log('server shutting down!')
-			torrenter.destroy()
-		})
-	}
 	return emitter
 }
 

@@ -1,15 +1,13 @@
-var Webtorrent = require('webtorrent')
 var xtend = require('xtend')
 var supportedAudio = require('./supportedAudio.js')
 var validFile = require('./fileValidity.js').valid
-var cfg = require('./config.json')
+var cfg = require('../config.json')
 
-var torrenter = new Webtorrent()
 function valid(x) {
 	return (process.env.test && typeof x === 'string') || validFile(x)
 }
 
-module.exports = function () {
+module.exports = function (torrenter) {
 	var storage = {}
 	var preferredFileType = cfg.defaultExtension
 	supportedAudio(function (type) {
@@ -38,7 +36,7 @@ module.exports = function () {
 	}
 
 	function remove(songId) {
-		torrenter.remove(storage)
+		torrenter.remove(storage) // What?
 		return (delete storage[songId])
 	}
 

@@ -1,18 +1,19 @@
 var test = require('tape')
-process.env.test = true
-var SERVER = '../server.js'
-var FileTransfer = require('../lib/fileTransfer.js')
+var Instance = require('../server/instance.js')
+var FileTransfer = require('../client/fileTransfer.js')
+var WebTorrent = require('webtorrent')
 
-function client(emitter) {
-	var transfer = FileTransfer()
+function setUpUploader(mockWebTorrent, emitter) {
+	var transfer = FileTransfer(mockWebTorrent)
 	emitter.on('hashes', transfer.download)
 	emitter.on('test_shut_down', transfer.shutdown)
 	return transfer.upload
 }
 
 test('ogg file', function (t) {
-	var emitter = require(SERVER)
-	var upload = client(emitter)
+	var mockWebTorrent = new WebTorrent()
+	var emitter = Instance(mockWebTorrent, true)
+	var upload = setUpUploader(mockWebTorrent, emitter)
 
 	var file = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')
@@ -26,7 +27,7 @@ test('ogg file', function (t) {
 	})
 
 	emitter.on('error', function (err) {
-		t.fail((err && err.message) ? err.message : 'network error')
+		t.fail(err ? err.message : 'network error')
 		end()
 	})
 
@@ -50,7 +51,7 @@ test('ogg file', function (t) {
 		t.fail('timeout')
 		end()
 	}, 5 * 60 * 1000) //5 min
-	
+
 	timeout.unref()
 })
 
