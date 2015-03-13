@@ -45,10 +45,12 @@ test('ogg file', function (t) {
 		t.pass('ending')
 		t.end()
 	}
+
 	var timeout = setTimeout(function tmt() {
 		t.fail('timeout')
 		end()
 	}, 5 * 60 * 1000) //5 min
+	
 	timeout.unref()
 })
 

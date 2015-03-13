@@ -8,9 +8,9 @@
 		"announce": ["wss://tracker.webtorrent.io"]
 	},
 	"socketIoUrl": "http://localhost/socketio",
-	"fileTypes": [
+	"extensions": [
 		"mp3",
 		"ogg"
 	],
-	"defaultFileType": "mp3"
+	"defaultExtension": "mp3"
 }
