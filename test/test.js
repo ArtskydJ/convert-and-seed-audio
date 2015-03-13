@@ -1,7 +1,7 @@
 var test = require('tape')
 var Instance = require('../server/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
-var WebTorrent = require('webtorrent')
+var WebTorrent = require('./fixtures/mock-webtorrent.js')
 
 function setUpUploader(mockWebTorrent, emitter) {
 	var transfer = FileTransfer(mockWebTorrent)
