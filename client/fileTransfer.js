@@ -3,11 +3,8 @@ var supportedAudio = require('./supportedAudio.js')
 var validFile = require('./fileValidity.js').valid
 var cfg = require('../config.json')
 
-function valid(x) {
-	return (process.env.test && typeof x === 'string') || validFile(x)
-}
-
-module.exports = function (torrenter) {
+module.exports = function ft(torrenter, valid) {
+	valid = valid || validFile
 	var storage = {}
 	var preferredFileType = cfg.defaultExtension
 	supportedAudio(function (type) {
@@ -40,28 +37,22 @@ module.exports = function (torrenter) {
 		return (delete storage[songId])
 	}
 
-	function shutdown() {
-		//console.log('file transfer shutting down!')
-		torrenter.destroy()
+	function saveSong(id) {
+		//logGetting(id)
+		return function ontorrent(torrent) {
+			//logDownloaded(torrent)
+			var file = torrent.files[0]
+			file.getBlobURL(function callback (err, url) {
+				storage[id] = url
+			})
+		}
 	}
 
 	return {
 		download: download,
 		upload: upload,
 		get: get,
-		remove: remove,
-		shutdown: shutdown
-	}
-}
-
-function saveSong(id) {
-	//logGetting(id)
-	return function ontorrent(torrent) {
-		//logDownloaded(torrent)
-		var file = torrent.files[0]
-		file.getBlobURL(function callback (err, url) {
-			storage[id] = url
-		})
+		remove: remove
 	}
 }
 

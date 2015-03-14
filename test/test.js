@@ -1,25 +1,34 @@
+var MOCK = true
+
 var test = require('tape')
 var Instance = require('../server/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
-var WebTorrent = require('./fixtures/mock-webtorrent.js')
+var WebTorrent = require(MOCK ? './fixtures/mock-webtorrent.js' : 'webtorrent')
 
-function setUpUploader(mockWebTorrent, emitter) {
-	var transfer = FileTransfer(mockWebTorrent)
+
+function isString(x) {
+	return typeof x === 'string'
+}
+
+function setUpUploader(torrenter, emitter) {
+	var transfer = FileTransfer(torrenter, isString)
 	emitter.on('hashes', transfer.download)
-	emitter.on('test_shut_down', transfer.shutdown)
 	return transfer.upload
 }
 
 test('ogg file', function (t) {
-	var mockWebTorrent = new WebTorrent()
-	var emitter = Instance(mockWebTorrent, true)
-	var upload = setUpUploader(mockWebTorrent, emitter)
+	var torrenter1 = new WebTorrent()
+	var torrenter2 = MOCK ? torrenter1 : new WebTorrent()
 
-	var file = __dirname + '/audio/test_1.ogg'
+	var emitter = Instance(torrenter1)
+	var upload = setUpUploader(torrenter2, emitter)
+
+	var filename = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')
 	var timeStartUpload = new Date().getTime()
-	upload(file, function onSeed(infhsh) {
-		var timeSeeding = new Date().getTime()
+	var timeSeeding = Infinity
+	upload(filename, function onSeed(infhsh) {
+		timeSeeding = new Date().getTime()
 		var dur = (timeSeeding - timeStartUpload) / 1000
 		t.pass('Seeding file #1, took ' + dur + ' seconds.')
 		originalInfoHash = infhsh
@@ -31,18 +40,21 @@ test('ogg file', function (t) {
 		end()
 	})
 
-	emitter.on('hashes', function (err, infoHashes) { // This never fires...
+	emitter.on('hashes', function (infoHashes) {
 		var timeHashes = new Date().getTime()
 		var dur = (timeHashes - timeSeeding) / 1000
-		t.notOk(err, err ? err.message : 'no error')
+
 		t.equal(infoHashes.length, 2, '2 info hashes returned, took ' + dur + ' seconds.')
-		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, 'does not have original info hash')
+
+		var msg = '"' + originalInfoHash + '" is in "' + infoHashes.join('", "') + '"'
+		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, msg)
 		end()
 	})
 
 	function end() {
 		clearTimeout(timeout)
-		emitter.emit('test_shut_down')
+		torrenter1.destroy()
+		torrenter2.destroy()
 		t.pass('ending')
 		t.end()
 	}

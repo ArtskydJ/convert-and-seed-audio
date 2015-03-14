@@ -6,24 +6,15 @@ var each = require('async-each')
 var createTempFile = require('create-temp-file')
 var cfg = require('../config.json')
 
-module.exports = function Instance(torrenter, test) {
+module.exports = function Instance(torrenter) {
 	var emitter = new EventEmitter()
-
-	if (test) {
-		emitter.on('test_shut_down', function () {
-			console.log('server shutting down!')
-			torrenter.destroy()
-		})
-	}
-
-	var upcomingSongs = [] //playing and upcoming
 
 	emitter.on('upload', function (infHsh) {
 		console.log('upload ' + infHsh)
 		torrenter.download(infHsh, cfg.webtorrent, onTorrent(function finished(err, hashes) {
 			console.log('upload done', err, hashes)
 			err ?
-				console.error('upload error: ' + err.message) :
+				emitter.emit('error', err) :
 				emitter.emit('hashes', hashes)
 		}))
 	})
@@ -36,20 +27,20 @@ function onTorrent(cb) {
 		console.log('on torrent')
 		var file = torrent.files[0]
 		if (file) {
-			var stream = file.createReadStream()
-			each(cfg.extensions, uploadFormat(file.name, stream), cb)
+			each(cfg.extensions, uploadFormat(file, torrent.infoHash), cb)
 		} else {
 			cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
 		}
 	}
 }
 
-function uploadFormat(filename, stream) {
+function uploadFormat(file, infoHash) {
 	return function uf(extension, next) {
-		console.log('Converting ' + filename + ' to a ' + extension + ' file.')
+		console.log('Converting ' + file.name + ' to a ' + extension + ' file.')
 		var tmpFile = createTempFile()
-		var doConvert = isExtension(filename, extension)
+		var doConvert = isExtension(file.name, extension)
 		if (doConvert) {
+			var stream = file.createReadStream()
 			convert(stream, extension)
 				.pipe(tmpFile)
 				.on('finish', function () {
@@ -57,7 +48,7 @@ function uploadFormat(filename, stream) {
 					next(null, newTorrent.infoHash)
 				})
 		} else {
-			next(torrent.infoHash)
+			next(null, infoHash)
 		}
 	}
 }

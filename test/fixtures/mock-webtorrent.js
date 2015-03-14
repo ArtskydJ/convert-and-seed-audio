@@ -1,30 +1,22 @@
-function noop() {}
+var path = require('path')
+var fs = require('fs')
+
+// I think this mock might be too forgiving...
 
 module.exports = function MockWebTorrent() {
-	var seeding = {}
-	var downloading = {}
+	var torrents = {}
 
-	var interval = setInterval(noop, 1000)
-
+	var keepAlive = setInterval(function () {}, 1000)
 	function destroy() {
-		console.log('torrenter.destroy()')
-
-		clearInterval(interval)
+		clearInterval(keepAlive)
 	}
 
 	function remove(infoHash) {
-		console.log('torrenter.destroy()')
-
-		delete seeding[infoHash]
-		delete downloading[infoHash]
+		delete torrents[infoHash]
 	}
 
 	function seed(files, cb) {
-		console.log('torrenter.seed()')
-		if (downloading[infoHash]) throw new Error('already downloading')
-
-		var torrent = FakeTorrent( ensureArray(files) )
-		seeding[infoHash] = torrent
+		var torrent = createTorrent(files)
 		setTimeout(cb, 0, torrent)
 	}
 
@@ -33,14 +25,27 @@ module.exports = function MockWebTorrent() {
 			cb = config
 			config = {}
 		}
-		console.log('torrenter.download/add()')
-		if (seeding[infoHash]) throw new Error('already seeding')
-
-		downloading[infoHash] = FakeTorrent()
+		//throwIfDuplicate(infoHash)
+		var torrent = torrents[infoHash] || createTorrent(infoHash)
+		setTimeout(cb, 0, torrent)
 	}
 
-	function FakeTorrent() {
-		return {}
+	function createTorrent(filename) {
+		var filenames = ensureArray(filename)
+		var infoHash = path.basename(filenames[0])
+		var torrent = {
+			infoHash: infoHash,
+			files: filenames.map(createFile)
+		}
+		//throwIfDuplicate(infoHash)
+		torrents[infoHash] = torrent
+		return torrent
+	}
+
+	function throwIfDuplicate(infoHash) {
+		if (torrents[infoHash]) {
+			throw new Error(infoHash + ' torrent already exists.')
+		}
 	}
 
 	return {
@@ -52,6 +57,19 @@ module.exports = function MockWebTorrent() {
 	}
 }
 
+function getBlobURL(filename) {
+	return function gbUrl(cb) {
+		setTimeout(cb, 0, filename)
+	}
+}
+
+function createFile(filename) {
+	return {
+		name: filename,
+		getBlobURL: getBlobURL(filename),
+		createReadStream: fs.createReadStream.bind(fs, filename)
+	}
+}
 
 function ensureArray(thing) {
 	return (Array.isArray(thing)) ? thing : [thing]
