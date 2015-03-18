@@ -1,10 +1,21 @@
-var MOCK = true
+var MOCK = false
 
 var test = require('tape')
 var Instance = require('../server/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
 var WebTorrent = require(MOCK ? './fixtures/mock-webtorrent.js' : 'webtorrent')
 
+var writeFileSync = require('fs').writeFileSync
+var inspect = require('util').inspect
+function write(filename, obj) {
+	writeFileSync(filename, inspect(obj, { depth: Infinity }))
+}
+
+function createTorrenters() {
+	var t1 = new WebTorrent()
+	var t2 = MOCK ? t1 : new WebTorrent()
+	return [ t1, t2 ]
+}
 
 function isString(x) {
 	return typeof x === 'string'
@@ -17,19 +28,21 @@ function setUpUploader(torrenter, emitter) {
 }
 
 test('ogg file', function (t) {
-	var torrenter1 = new WebTorrent()
-	var torrenter2 = MOCK ? torrenter1 : new WebTorrent()
+	var torrenters = createTorrenters()
 
-	var emitter = Instance(torrenter1)
-	var upload = setUpUploader(torrenter2, emitter)
+	var emitter = Instance(torrenters[0])
+	var upload = setUpUploader(torrenters[1], emitter)
 
 	var filename = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')
-	var timeStartUpload = new Date().getTime()
-	var timeSeeding = Infinity
+	var timeStart = new Date().getTime()
+	var timeSeeding = null
 	upload(filename, function onSeed(infhsh) {
+		torrenters.forEach(function (torr, i) {
+			write('t' + (i+1) + '.txt', torr)
+		})
 		timeSeeding = new Date().getTime()
-		var dur = (timeSeeding - timeStartUpload) / 1000
+		var dur = (timeSeeding - timeStart) / 1000
 		t.pass('Seeding file #1, took ' + dur + ' seconds.')
 		originalInfoHash = infhsh
 		emitter.emit('upload', originalInfoHash)
@@ -53,8 +66,9 @@ test('ogg file', function (t) {
 
 	function end() {
 		clearTimeout(timeout)
-		torrenter1.destroy()
-		torrenter2.destroy()
+		torrenters.forEach(function (torr) {
+			torr.destroy()
+		})
 		t.pass('ending')
 		t.end()
 	}
