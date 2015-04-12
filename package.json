@@ -29,12 +29,11 @@
     "in-browser": "^1.0.1",
     "shoe": "0.0.15",
     "sox-stream": "^0.1.6",
-    "tape": "^3.0.3",
-    "webtorrent": "^0.27.0",
+    "webtorrent": "^0.32.0",
     "xtend": "^4.0.0"
   },
   "devDependencies": {
-    "tape": "^3.0.3",
+    "tape": "^4.0.0",
     "through2-map": "^1.4.0"
   }
 }
