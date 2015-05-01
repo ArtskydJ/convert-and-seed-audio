@@ -38,7 +38,7 @@ test('ogg file', function (t) {
 	var timeStart = new Date().getTime()
 	var timeSeeding = null
 	upload(filename, function onSeed(infhsh) {
-		torrenters.forEach(function (torr, i) {
+		torrenters.forEach(function tfe1(torr, i) {
 			write('t' + (i+1) + '.txt', torr)
 		})
 		timeSeeding = new Date().getTime()
@@ -48,12 +48,12 @@ test('ogg file', function (t) {
 		emitter.emit('upload', originalInfoHash)
 	})
 
-	emitter.on('error', function (err) {
+	emitter.on('error', function er(err) {
 		t.fail(err ? err.message : 'network error')
 		end()
 	})
 
-	emitter.on('hashes', function (infoHashes) {
+	emitter.on('hashes', function ha(infoHashes) {
 		console.log('############################## hashes, get it?')
 		var timeHashes = new Date().getTime()
 		var dur = (timeHashes - timeSeeding) / 1000
@@ -67,7 +67,7 @@ test('ogg file', function (t) {
 
 	function end() {
 		clearTimeout(timeout)
-		torrenters.forEach(function (torr) {
+		torrenters.forEach(function tfe2(torr) {
 			torr.destroy()
 		})
 		t.pass('ending')

@@ -9,7 +9,7 @@ var cfg = require('../config.json')
 module.exports = function Instance(torrenter) {
 	var emitter = new EventEmitter()
 
-	emitter.on('upload', function (infHsh) {
+	emitter.on('upload', function ul(infHsh) {
 		console.log('upload ' + infHsh)
 		torrenter.download(infHsh, cfg.webtorrent, onTorrent(function finished(err, hashes) {
 			console.log('upload done', err, hashes)
@@ -43,8 +43,8 @@ function uploadFormat(file, infoHash) {
 			var stream = file.createReadStream()
 			convert(stream, extension)
 				.pipe(tmpFile)
-				.on('finish', function () {
-					var newTorrent = torrenter.seed([tmpFile.path], function () {}) //skip the noop?
+				.on('finish', function f() {
+					var newTorrent = torrenter.seed([tmpFile.path], function n() {}) //skip the noop?
 					next(null, newTorrent.infoHash)
 				})
 		} else {
