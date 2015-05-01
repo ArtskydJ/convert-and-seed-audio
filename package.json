@@ -4,7 +4,7 @@
   "description": "gets an audio file, and seeds alternative formats",
   "main": "index.html",
   "scripts": {
-    "test": "tap test/*.js",
+    "test": "tape test/*.js",
     "prestart": "browserify test/test.js > test/testbundle.js",
     "start": "nw ."
   },
