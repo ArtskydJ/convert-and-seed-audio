@@ -54,6 +54,7 @@ test('ogg file', function (t) {
 	})
 
 	emitter.on('hashes', function (infoHashes) {
+		console.log('############################## hashes, get it?')
 		var timeHashes = new Date().getTime()
 		var dur = (timeHashes - timeSeeding) / 1000
 
