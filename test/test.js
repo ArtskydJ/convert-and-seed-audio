@@ -23,7 +23,11 @@ function isString(x) {
 
 function setUpUploader(torrenter, emitter) {
 	var transfer = FileTransfer(torrenter, isString)
-	emitter.on('hashes', transfer.download)
+	emitter.on('hashes', function (hashes) {
+		console.log('HASHES:', hashes)
+		if (typeof hashes === 'string') hashes = [hashes]
+		transfer.download(hashes)
+	})
 	return transfer.upload
 }
 

@@ -13,13 +13,13 @@ module.exports = function ft(torrenter, valid) {
 
 	function download(songBundles) {
 		ensureArray(songBundles).forEach(function dl(songBundle) {
-			console.log('sb:')
-			console.log(songBundle)
-			console.log('pft:')
-			console.log(songBundle[preferredFileType])
-			var infoHash = songBundle[preferredFileType]
+			//console.log('sb:')
+			//console.log(songBundle)
+			//console.log('pft:')
+			//console.log(songBundle[preferredFileType])
+			var infoHash = songBundle //[preferredFileType]
 			console.log('INFOHASH:', infoHash)
-			var id = songBundle.id
+			var id = songBundle //.id
 			torrenter.download(infoHash, cfg.webtorrent, saveSong(id))
 		})
 	}
