@@ -2,6 +2,7 @@ var xtend = require('xtend')
 var supportedAudio = require('./supportedAudio.js')
 var validFile = require('./fileValidity.js').valid
 var cfg = require('../config.json')
+var dupe = require('dupe')
 
 module.exports = function ft(torrenter, valid) {
 	valid = valid || validFile
@@ -12,7 +13,7 @@ module.exports = function ft(torrenter, valid) {
 	})
 
 	function download(songBundles) {
-		ensureArray(songBundles).forEach(function dl(songBundle) {
+		ensureArray(songBundles).filter(dupe).forEach(function dl(songBundle) {
 			//console.log('sb:')
 			//console.log(songBundle)
 			//console.log('pft:')

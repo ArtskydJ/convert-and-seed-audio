@@ -24,6 +24,7 @@
     "create-temp-file": "^0.1.0",
     "domready": "^1.0.7",
     "drag-drop": "^2.0.0",
+    "dupe": "^1.0.0",
     "ecstatic": "^0.5.8",
     "emit-stream": "^0.1.2",
     "in-browser": "^1.0.1",
