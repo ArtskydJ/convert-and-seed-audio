@@ -6,12 +6,6 @@ var ClientInstance = require('../client/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
 var WebTorrent = require(MOCK ? './fixtures/mock-webtorrent.js' : 'webtorrent')
 
-var writeFileSync = require('fs').writeFileSync
-var inspect = require('util').inspect
-function write(filename, obj) {
-	writeFileSync(filename, inspect(obj, { depth: Infinity }))
-}
-
 function createTorrenters() {
 	var t1 = new WebTorrent()
 	var t2 = MOCK ? t1 : new WebTorrent()
