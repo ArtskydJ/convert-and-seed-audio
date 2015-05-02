@@ -12,12 +12,12 @@ module.exports = function ft(torrenter, valid) {
 
 	function download(songBundles) {
 		ensureArray(songBundles).filter(dupe).forEach(function dl(songBundle) {
-			//console.log('sb:')
+			//console.log('song bundle:')
 			//console.log(songBundle)
-			//console.log('pft:')
+			//console.log('prefered song:')
 			//console.log(songBundle[preferredFileType])
 			var infoHash = songBundle //[preferredFileType]
-			console.log('INFOHASH:', infoHash)
+			//console.log('INFOHASH:', infoHash)
 			var id = songBundle //.id
 			torrenter.download(infoHash, cfg.webtorrent, saveSong(id))
 		})
