@@ -1,7 +1,8 @@
 var MOCK = false
 
 var test = require('tape')
-var Instance = require('../server/instance.js')
+var ServerInstance = require('../server/instance.js')
+var ClientInstance = require('../client/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
 var WebTorrent = require(MOCK ? './fixtures/mock-webtorrent.js' : 'webtorrent')
 
@@ -21,21 +22,11 @@ function isString(x) {
 	return typeof x === 'string'
 }
 
-function setUpUploader(torrenter, emitter) {
-	var transfer = FileTransfer(torrenter, isString)
-	emitter.on('hashes', function (hashes) {
-		console.log('HASHES:', hashes)
-		if (typeof hashes === 'string') hashes = [hashes]
-		transfer.download(hashes)
-	})
-	return transfer.upload
-}
-
 test('ogg file', function (t) {
 	var torrenters = createTorrenters()
 
-	var emitter = Instance(torrenters[0])
-	var upload = setUpUploader(torrenters[1], emitter)
+	var emitter = ServerInstance(torrenters[0])
+	var upload = ClientInstance(torrenters[1], emitter, isString)
 
 	var filename = __dirname + '/audio/test_1.ogg'
 	t.pass('Connecting, Seeding #1')

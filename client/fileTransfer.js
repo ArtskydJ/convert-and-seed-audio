@@ -1,11 +1,9 @@
 var xtend = require('xtend')
 var supportedAudio = require('./supportedAudio.js')
-var validFile = require('./fileValidity.js').valid
 var cfg = require('../config.json')
 var dupe = require('dupe')
 
 module.exports = function ft(torrenter, valid) {
-	valid = valid || validFile
 	var storage = {}
 	var preferredFileType = cfg.defaultExtension
 	supportedAudio(function (type) {
