@@ -27,9 +27,6 @@ test('ogg file', function (t) {
 	var timeStart = new Date().getTime()
 	var timeSeeding = null
 	upload(filename, function onSeed(infhsh) {
-		torrenters.forEach(function tfe1(torr, i) {
-			write('t' + (i+1) + '.txt', torr)
-		})
 		timeSeeding = new Date().getTime()
 		var dur = (timeSeeding - timeStart) / 1000
 		t.pass('Seeding file #1, took ' + dur + ' seconds.')
