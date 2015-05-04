@@ -2,7 +2,7 @@ var test = require('tape')
 var ServerInstance = require('../server/instance.js')
 var ClientInstance = require('../client/instance.js')
 var FileTransfer = require('../client/fileTransfer.js')
-var WebTorrent = require('webtorrent')
+var WebTorrent = require('webtorrent-hybrid')
 
 function isString(x) {
 	return typeof x === 'string'

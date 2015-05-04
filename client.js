@@ -1,4 +1,4 @@
-var WebTorrent = require('webtorrent')
+var WebTorrent = require('webtorrent-hybrid')
 var shoe = require('shoe')
 var emitStream = require('emit-stream')
 var JSONStream = require('JSONStream')
