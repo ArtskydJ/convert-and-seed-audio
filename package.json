@@ -2,7 +2,7 @@
   "name": "convert-and-seed-audio",
   "version": "0.0.1",
   "description": "gets an audio file, and seeds alternative formats",
-  "main": "index.html",
+  "main": "./server/server.js",
   "scripts": {
     "test": "tape test/*.js",
     "prestart": "browserify test/test.js > test/testbundle.js",
@@ -29,7 +29,7 @@
     "in-browser": "^1.0.1",
     "shoe": "0.0.15",
     "sox-stream": "^1.0.0",
-    "webtorrent-hybrid": "^0.35.0",
+    "webtorrent": "^0.35.0",
     "xtend": "^4.0.0"
   },
   "devDependencies": {

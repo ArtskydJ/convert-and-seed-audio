@@ -1,9 +1,9 @@
-var WebTorrent = require('webtorrent-hybrid')
+var WebTorrent = require('webtorrent')
 var shoe = require('shoe')
 var emitStream = require('emit-stream')
 var JSONStream = require('JSONStream')
 var dragDrop = require('drag-drop/buffer') // ('drag-drop')
-var ClientInstance = require('./client/instance.js')
+var ClientInstance = require('./instance.js')
 
 var torrenter = new WebTorrent()
 var emitter = emitStream(

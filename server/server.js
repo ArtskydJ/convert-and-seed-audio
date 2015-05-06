@@ -1,5 +1,5 @@
-var Instance = require('./server/instance.js')
-var WebTorrent = require('webtorrent-hybrid')
+var Instance = require('./instance.js')
+var WebTorrent = require('webtorrent')
 var shoe = require('shoe')
 var http = require('http')
 var emitStream = require('emit-stream')
