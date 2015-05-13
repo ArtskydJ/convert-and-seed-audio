@@ -2,9 +2,10 @@ var xtend = require('xtend')
 var supportedAudio = require('./supportedAudio.js')
 var cfg = require('../config.json')
 var dupe = require('dupe')
+var KeyMaster = require('key-master')
 
 module.exports = function ft(torrenter, valid) {
-	var storage = {}
+	var storage = new KeyMaster(function () {})
 	var preferredFileType = cfg.defaultExtension
 	supportedAudio(function (type) {
 		preferredFileType = type
@@ -12,18 +13,18 @@ module.exports = function ft(torrenter, valid) {
 
 	function download(songBundles) {
 		ensureArray(songBundles).filter(dupe).forEach(function dl(songBundle) {
-			//console.log('song bundle:')
-			//console.log(songBundle)
-			//console.log('prefered song:')
-			//console.log(songBundle[preferredFileType])
-			var infoHash = songBundle //[preferredFileType]
-			//console.log('INFOHASH:', infoHash)
-			var id = songBundle //.id
-			torrenter.download(infoHash, cfg.webtorrent, saveSong(id))
+			var infoHash = songBundle
+			var id = songBundle
+			torrenter.download(infoHash, cfg.webtorrent, function ontorrent(torrent) {
+				var file = torrent.files[0]
+				file.getBlobURL(function callback (err, url) { // this makes like no sense
+					storage.set(id, url)
+				})
+			})
 		})
 	}
 
-	function upload(files, cb) {
+	function upload(files, cb) { // cb is called for each file
 		ensureArray(files).filter(valid).forEach(function (file) {
 			//var meta = copyProperties(file, ['name', 'size', 'type'])
 			torrenter.seed(file, function onseed(torrent) {
@@ -32,30 +33,15 @@ module.exports = function ft(torrenter, valid) {
 		})
 	}
 
-	function get(songId) {
-		return storage[songId]
-	}
-
 	function remove(songId) {
-		torrenter.remove(storage) // What?
-		return (delete storage[songId])
-	}
-
-	function saveSong(id) {
-		//logGetting(id)
-		return function ontorrent(torrent) {
-			//logDownloaded(torrent)
-			var file = torrent.files[0]
-			file.getBlobURL(function callback (err, url) {
-				storage[id] = url
-			})
-		}
+		torrenter.remove(songId)
+		storage.remove(songId)
 	}
 
 	return {
 		download: download,
 		upload: upload,
-		get: get,
+		get: storage.get,
 		remove: remove
 	}
 }
@@ -72,14 +58,3 @@ function copyProperties(src, keys) {
 function ensureArray(thing) {
 	return (Array.isArray(thing)) ? thing : [thing]
 }
-
-/*
-function logDownloaded(torrent) {
-	console.log('window.play("' + torrent.infoHash + '")')
-	console.log('downloaded from ' + torrent.swarm.wires.length + ' peers.')
-}
-
-function logGetting(thing) {
-	console.log('attempting to download: ' + thing)
-}
-*/
