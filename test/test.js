@@ -7,23 +7,30 @@ function isString(x) {
 	return typeof x === 'string'
 }
 
+function shorten(s) {
+	return s.slice(0, 6)
+}
+
+var startTime = new Date().getTime()
+function timeDiff() {
+	var endTime = new Date().getTime()
+	var duration = (endTime - startTime) / 1000
+	startTime = endTime
+	return duration
+}
+
 test('ogg file', function (t) {
 	var torrenter = new WebTorrent()
-	var timeStart = new Date().getTime()
-	var timeSeeding = null
 	var emitter = ServerInstance(torrenter)
-	var client = ClientInstance(torrenter, emitter, isString)
+	var upload = ClientInstance(torrenter, emitter, isString)
 	var filename = __dirname + '/audio/test_1.ogg'
+
+	var originalInfoHash = null
 
 	t.pass('Connecting, Seeding #1')
 
-	emitter.on('uploaded-hashes', client.download)
-
-	client.upload(filename, function onSeed(infhsh) {
-		timeSeeding = new Date().getTime()
-		var dur = (timeSeeding - timeStart) / 1000
-		t.pass('Seeding file #1, took ' + dur + ' seconds.')
-
+	upload(filename, function onSeed(infhsh) {
+		t.pass('seeding ' + timeDiff() + ' sec')
 		originalInfoHash = infhsh
 		emitter.emit('upload', originalInfoHash)
 	})
@@ -33,14 +40,15 @@ test('ogg file', function (t) {
 		end()
 	})
 
-	emitter.on('uploaded-hashes', function ha(infoHashes) {
-		var timeHashes = new Date().getTime()
-		var dur = (timeHashes - timeSeeding) / 1000
+	emitter.on('uploaded-bundle', function ha(bundle) {
+		var keys = Object.keys(bundle)
+		var infoHashes = keys.map(function (key) { return bundle[key] })
 
-		t.equal(infoHashes.length, 2, '2 info hashes returned, took ' + dur + ' seconds.')
+		t.pass('uploaded ' + timeDiff() + ' sec')
+		t.equal(keys.length, 2, '2 info hashes returned')
 
-		var ih = infoHashes.map(function (s) { return s.slice(0, 10) }).join('", "')
-		var msg = '"' + originalInfoHash + '" is in "' + ih + '"'
+		var ih = infoHashes.map(shorten).join('", "')
+		var msg = '"' + shorten(originalInfoHash) + '" is in "' + ih + '"'
 		t.notEqual(infoHashes.indexOf(originalInfoHash), -1, msg)
 		end()
 	})

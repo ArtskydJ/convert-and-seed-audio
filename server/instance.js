@@ -14,62 +14,61 @@ module.exports = function Instance(torrenter) {
 
 	emitter.on('upload', function ul(infHsh) {
 		console.log('upload ' + infHsh)
-		torrenter.download(infHsh, webtorrentConfig, onTorrent(function finished(err, hashes) {
-			console.log('upload done', err, hashes)
+		torrenter.download(infHsh, webtorrentConfig, onTorrent(torrenter, function finished(err, bundle) {
+			console.log('upload done', err, bundle)
 			err ?
 				emitter.emit('error', err) :
-				emitter.emit('uploaded-hashes', hashes)
+				emitter.emit('uploaded-bundle', bundle)
 		}))
 	})
 
 	return emitter
+}
 
-
-	function onTorrent(cb) {
-		return function ot(torrent) {
-			console.log('on torrent')
-			var file = torrent.files[0]
-			if (file) {
-				each(extensions, seedConverted(file, torrent.infoHash), function (err, hashes) {
-					if (err) {
-						cb(err)
-					} else {
-						cb(null, hashes.map(String))
-						/*var bundle = extensions.reduce(function (memo, curr, i) {
-							memo[curr] = hashes[i]
-							return memo
-						}, {})
-						cb(null, bundle)*/
-					}
-				})
-			} else {
-				cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
-			}
+function onTorrent(torrenter, cb) {
+	return function ot(torrent) {
+		console.log('on torrent')
+		var file = torrent.files[0]
+		if (file) {
+			each(extensions, seedConverted(torrenter, file, torrent.infoHash), function (err, hashes) {
+				if (err) {
+					cb(err)
+				} else {
+					var bundle = extensions.reduce(function (memo, curr, i) {
+						memo[curr] = hashes[i]
+						return memo
+					}, {})
+					cb(null, bundle)
+				}
+			})
+		} else {
+			cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
 		}
 	}
+}
 
-	function seedConverted(file, infoHash) {
-		return function uf(desiredExtension, next) {
-			var doNotConvert = file.name.endsWith(desiredExtension)
+function seedConverted(torrenter, file, infoHash) {
+	return function uf(desiredExtension, next) {
+		var doNotConvert = file.name.endsWith(desiredExtension)
 
-			if (doNotConvert) {
-				console.log(file.name + ' is already a ' + desiredExtension + ' file.')
+		if (doNotConvert) {
+			console.log(file.name + ' is already a ' + desiredExtension + ' file.')
 
-				next(null, infoHash)
-			} else {
-				console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
+			next(null, infoHash)
+		} else {
+			console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
 
-				var convert = Sox({ type: desiredExtension })
-				var tmpFile = createTempFile()
+			var convert = Sox({ type: desiredExtension })
+			var tmpFile = createTempFile()
 
-				file.createReadStream()
-					.pipe(convert)
-					.pipe(tmpFile)
-					.on('finish', function f() {
-						var newTorrent = torrenter.seed([tmpFile.path], function n() {}) //skip the noop?
+			file.createReadStream()
+				.pipe(convert)
+				.pipe(tmpFile)
+				.on('finish', function finish() {
+					torrenter.seed(tmpFile.path, function ontorrent(newTorrent) {
 						next(null, newTorrent.infoHash)
 					})
-			}
+				})
 		}
 	}
 }

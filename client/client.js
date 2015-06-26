@@ -5,18 +5,9 @@ var JSONStream = require('JSONStream')
 var dragDrop = require('drag-drop/buffer') // ('drag-drop')
 var ClientInstance = require('./instance.js')
 
-var torrenter = new WebTorrent()
-var emitter = emitStream(
-	shoe('/socket')
-		.pipe(JSONStream.parse([true]))
-)
-
-var client = ClientInstance(torrenter)
-
-emitter.on('uploaded-hashes', client.download)
-
-dragDrop('#dragDropUpload', function (files) {
-	client.upload(files, function eachfileup(infhsh) {
-		emitter.emit('upload', infhsh)
-	})
-})
+module.exports = function client()
+	var torrenter = new WebTorrent()
+	var stream = shoe('/socket').pipe(JSONStream.parse([true]))
+	var emitter = emitStream(stream)
+	return ClientInstance(torrenter, emitter)
+}

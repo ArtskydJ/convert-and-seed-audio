@@ -5,14 +5,15 @@ var http = require('http')
 var emitStream = require('emit-stream')
 var JSONStream = require('JSONStream')
 
-var torrenter = new WebTorrent()
-var emitter = Instance(torrenter)
-var sock = shoe(function (stream) {
-	emitStream(emitter)
-		.pipe(JSONStream.stringify())
-		.pipe(stream)
-})
-var server = http.createServer()
-
-sock.install(server, '/socket')
-server.listen(8080)
+module.exports = function createServer(reqListen) {
+	var torrenter = new WebTorrent()
+	var emitter = Instance(torrenter)
+	var sock = shoe(function (stream) {
+		emitStream(emitter)
+			.pipe(JSONStream.stringify())
+			.pipe(stream)
+	})
+	var server = http.createServer(reqListen)
+	sock.install(server, '/socket')
+	return server
+}

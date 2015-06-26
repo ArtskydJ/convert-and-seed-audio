@@ -1,33 +1,38 @@
 var xtend = require('xtend')
 var bestAudioFileType = require('./best-audio-node.js')
 var webtorrentConfig = require('../config.json').webtorrent
-var validFile = require('./file-validity.js').valid
+var defaultValidFile = require('./file-validity.js').valid
 
-module.exports = function ft(torrenter, emitter, valid) {
+module.exports = function instance(torrenter, emitter, customValidFile) {
+	var transfer = fileTransfer(torrenter, customValidFile || defaultValidFile)
+
+	emitter.on('uploaded-bundle', transfer.download)
+
+	return function upload(files, cb) {
+		transfer.upload(files, function (infoHash) {
+			emitter.emit('seeding', infoHash)
+			cb(infoHash) // this should be all the info hashes, not one at a time; this callback is called multiple times...
+		})
+	}
+}
+
+function fileTransfer(torrenter, validFile) {
 	var storage = {}
 	var preferredFileType = bestAudioFileType()
-
-	emitter.on('uploaded-hashes', function (hashes) {
-		download(hashes) // turn hases into a bundle? should a bundle be emitted instead?
-	})
 
 	function download(songBundles) {
 		console.log('DONWLODN:', songBundles)
 		ensureArray(songBundles).forEach(function dl(songBundle) {
 			console.log('song bundle:', songBundle)
-			//console.log('prefered song:')
-			//console.log(songBundle[preferredFileType])
-			var infoHash = songBundle //[preferredFileType]
-			//console.log('INFOHASH:', infoHash)
-			var id = songBundle //.id
+			var infoHash = songBundle[preferredFileType]
+			var id = songBundle
 			torrenter.download(infoHash, webtorrentConfig, saveSong(id))
 		})
 	}
 
 	function upload(files, cb) {
 		console.log('UPLAOD', files)
-		ensureArray(files).filter(valid || validFile).forEach(function (file) {
-			//var meta = copyProperties(file, ['name', 'size', 'type'])
+		ensureArray(files).filter(validFile).forEach(function (file) { // use async each here!!!!!
 			torrenter.seed(file, function onseed(torrent) {
 				cb(torrent.infoHash)
 			})
@@ -44,13 +49,15 @@ module.exports = function ft(torrenter, emitter, valid) {
 	}
 
 	function saveSong(id) {
-		//logGetting(id)
 		return function ontorrent(torrent) {
-			//logDownloaded(torrent)
 			var file = torrent.files[0]
-			file.getBlobURL(function callback (err, url) {
-				storage[id] = url
-			})
+			if (process.browser) {
+				file.getBlobURL(function (err, url) {
+					storage[id] = url
+				})
+			} else {
+				storage[id] = file
+			}
 		}
 	}
 
@@ -62,26 +69,6 @@ module.exports = function ft(torrenter, emitter, valid) {
 	}
 }
 
-/*
-function copyProperties(src, keys) {
-	return ensureArray(keys).reduce(function (dest, key) {
-		dest[key] = src[key]
-		return dest
-	}, {})
-}
-*/
-
 function ensureArray(thing) {
 	return (Array.isArray(thing)) ? thing : [thing]
 }
-
-/*
-function logDownloaded(torrent) {
-	console.log('window.play("' + torrent.infoHash + '")')
-	console.log('downloaded from ' + torrent.swarm.wires.length + ' peers.')
-}
-
-function logGetting(thing) {
-	console.log('attempting to download: ' + thing)
-}
-*/
