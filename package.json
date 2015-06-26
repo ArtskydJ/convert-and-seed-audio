@@ -8,7 +8,7 @@
     "./client/best-audio-node.js": "./client/best-audio-browser.js"
   },
   "scripts": {
-    "test": "tape test/*.js",
+    "test": "node test/test.js",
     "build": "browserify test/test.js -o test/testbundle.js",
     "watch": "watchify test/test.js -d -o test/testbundle.js"
   },
@@ -28,7 +28,6 @@
     "create-temp-file": "^0.1.1",
     "domready": "^1.0.8",
     "drag-drop": "^2.1.0",
-    "dupe": "^1.0.1",
     "emit-stream": "^0.1.2",
     "in-browser": "^1.0.1",
     "key-master": "^1.0.0",

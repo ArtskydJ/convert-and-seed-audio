@@ -1,7 +1,6 @@
 var xtend = require('xtend')
 var bestAudioFileType = require('./best-audio-node.js')
 var webtorrentConfig = require('../config.json').webtorrent
-//var dupe = require('dupe')
 var validFile = require('./file-validity.js').valid
 
 module.exports = function ft(torrenter, emitter, valid) {

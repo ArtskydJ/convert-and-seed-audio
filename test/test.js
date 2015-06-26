@@ -2,32 +2,10 @@ var test = require('tape')
 var ClientInstance = require('../client/instance.js')
 var WebTorrent = require('webtorrent')
 var ServerInstance = require('../server/instance.js')
-/*var JSONStream = require('JSONStream')
-var emitStream = require('emit-stream')
-var net = require('net')
-var spawn = require('child_process').spawn*/
-
-var emitter = null
-var child = null
 
 function isString(x) {
 	return typeof x === 'string'
 }
-/*
-test('get emitter', function (t) {
-	child = spawn('node', [ __dirname + '/test-server.js' ])
-	var stream = net.connect(5555).pipe(JSONStream.parse([true]))
-	emitter = emitStream(stream)
-	stream.on('connect', function () {
-		t.pass()
-		t.end()
-	})
-	stream.on('error', function (err) {
-		t.fail(String(err))
-		t.end()
-	})
-})
-*/
 
 test('ogg file', function (t) {
 	var torrenter = new WebTorrent()
