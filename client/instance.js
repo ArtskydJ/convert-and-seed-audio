@@ -1,4 +1,3 @@
-var xtend = require('xtend')
 var bestAudioFileType = require('./best-audio-node.js')
 var webtorrentConfig = require('../config.json').webtorrent
 var defaultValidFile = require('./file-validity.js').valid

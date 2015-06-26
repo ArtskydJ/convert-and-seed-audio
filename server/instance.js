@@ -1,6 +1,5 @@
 var EventEmitter = require('events').EventEmitter
 var Sox = require('sox-stream')
-var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
@@ -61,6 +60,8 @@ function seedConverted(torrenter, file, infoHash) {
 			var convert = Sox({ type: desiredExtension })
 			var tmpFile = createTempFile()
 
+			// use require('sox.js'), file.path, and require('tempfile')
+			//instead of require('create-temp-file') and require('sox-stream')
 			file.createReadStream()
 				.pipe(convert)
 				.pipe(tmpFile)

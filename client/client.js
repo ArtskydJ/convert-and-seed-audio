@@ -2,7 +2,6 @@ var WebTorrent = require('webtorrent')
 var shoe = require('shoe')
 var emitStream = require('emit-stream')
 var JSONStream = require('JSONStream')
-var dragDrop = require('drag-drop/buffer') // ('drag-drop')
 var ClientInstance = require('./instance.js')
 
 module.exports = function client()

@@ -1,5 +1,4 @@
 var extensions = require('../config.json').extensions
-var domready = require('domready')
 
 module.exports = function best() {
 	return extensions.map(ratePlayability).sort()[0]
