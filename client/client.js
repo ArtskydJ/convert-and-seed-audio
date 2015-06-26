@@ -11,11 +11,12 @@ var emitter = emitStream(
 		.pipe(JSONStream.parse([true]))
 )
 
-var upload = ClientInstance(torrenter, emitter)
+var client = ClientInstance(torrenter)
+
+emitter.on('uploaded-hashes', client.download)
 
 dragDrop('#dragDropUpload', function (files) {
-	upload(files, function eachfileup(infhsh) {
+	client.upload(files, function eachfileup(infhsh) {
 		emitter.emit('upload', infhsh)
-		//emitter.emit.bind(emitter, 'upload')
 	})
 })

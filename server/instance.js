@@ -1,62 +1,75 @@
 var EventEmitter = require('events').EventEmitter
-var sox = require('sox-stream')
+var Sox = require('sox-stream')
 var xtend = require('xtend')
 var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
 var cfg = require('../config.json')
+var extensions = cfg.extensions
+var webtorrentConfig = cfg.webtorrent
+require('string.prototype.endswith')
 
 module.exports = function Instance(torrenter) {
 	var emitter = new EventEmitter()
 
 	emitter.on('upload', function ul(infHsh) {
 		console.log('upload ' + infHsh)
-		torrenter.download(infHsh, cfg.webtorrent, onTorrent(function finished(err, hashes) {
+		torrenter.download(infHsh, webtorrentConfig, onTorrent(function finished(err, hashes) {
 			console.log('upload done', err, hashes)
 			err ?
 				emitter.emit('error', err) :
-				emitter.emit('hashes', hashes)
+				emitter.emit('uploaded-hashes', hashes)
 		}))
 	})
 
 	return emitter
-}
 
-function onTorrent(cb) {
-	return function ot(torrent) {
-		console.log('on torrent')
-		var file = torrent.files[0]
-		if (file) {
-			each(cfg.extensions, uploadFormat(file, torrent.infoHash), cb)
-		} else {
-			cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
-		}
-	}
-}
 
-function uploadFormat(file, infoHash) {
-	return function uf(extension, next) {
-		console.log('Converting ' + file.name + ' to a ' + extension + ' file.')
-		var tmpFile = createTempFile()
-		var doConvert = isExtension(file.name, extension)
-		if (doConvert) {
-			var stream = file.createReadStream()
-			convert(stream, extension)
-				.pipe(tmpFile)
-				.on('finish', function f() {
-					var newTorrent = torrenter.seed([tmpFile.path], function n() {}) //skip the noop?
-					next(null, newTorrent.infoHash)
+	function onTorrent(cb) {
+		return function ot(torrent) {
+			console.log('on torrent')
+			var file = torrent.files[0]
+			if (file) {
+				each(extensions, seedConverted(file, torrent.infoHash), function (err, hashes) {
+					if (err) {
+						cb(err)
+					} else {
+						cb(null, hashes.map(String))
+						/*var bundle = extensions.reduce(function (memo, curr, i) {
+							memo[curr] = hashes[i]
+							return memo
+						}, {})
+						cb(null, bundle)*/
+					}
 				})
-		} else {
-			next(null, infoHash)
+			} else {
+				cb(new Error('No file found in torrent: ' + torrent && torrent.infoHash))
+			}
 		}
 	}
-}
 
-function isExtension(filename, extension) {
-	return extension.toLowerCase() === path.extname(filename).toLowerCase()
-}
+	function seedConverted(file, infoHash) {
+		return function uf(desiredExtension, next) {
+			var doNotConvert = file.name.endsWith(desiredExtension)
 
-function convert(stream, extension) {
-	return stream.pipe( sox({ type: extension }) )
+			if (doNotConvert) {
+				console.log(file.name + ' is already a ' + desiredExtension + ' file.')
+
+				next(null, infoHash)
+			} else {
+				console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
+
+				var convert = Sox({ type: desiredExtension })
+				var tmpFile = createTempFile()
+
+				file.createReadStream()
+					.pipe(convert)
+					.pipe(tmpFile)
+					.on('finish', function f() {
+						var newTorrent = torrenter.seed([tmpFile.path], function n() {}) //skip the noop?
+						next(null, newTorrent.infoHash)
+					})
+			}
+		}
+	}
 }

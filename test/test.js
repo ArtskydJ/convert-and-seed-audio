@@ -1,23 +1,47 @@
 var test = require('tape')
-var ServerInstance = require('../server/instance.js')
 var ClientInstance = require('../client/instance.js')
 var WebTorrent = require('webtorrent')
+var ServerInstance = require('../server/instance.js')
+/*var JSONStream = require('JSONStream')
+var emitStream = require('emit-stream')
+var net = require('net')
+var spawn = require('child_process').spawn*/
+
+var emitter = null
+var child = null
 
 function isString(x) {
 	return typeof x === 'string'
 }
+/*
+test('get emitter', function (t) {
+	child = spawn('node', [ __dirname + '/test-server.js' ])
+	var stream = net.connect(5555).pipe(JSONStream.parse([true]))
+	emitter = emitStream(stream)
+	stream.on('connect', function () {
+		t.pass()
+		t.end()
+	})
+	stream.on('error', function (err) {
+		t.fail(String(err))
+		t.end()
+	})
+})
+*/
 
 test('ogg file', function (t) {
-	var torrenters = [ new WebTorrent(), new WebTorrent() ]
+	var torrenter = new WebTorrent()
 	var timeStart = new Date().getTime()
 	var timeSeeding = null
-	var emitter = ServerInstance(torrenters[0])
-	var upload = ClientInstance(torrenters[1], emitter, isString)
+	var emitter = ServerInstance(torrenter)
+	var client = ClientInstance(torrenter, emitter, isString)
 	var filename = __dirname + '/audio/test_1.ogg'
 
 	t.pass('Connecting, Seeding #1')
 
-	upload(filename, function onSeed(infhsh) {
+	emitter.on('uploaded-hashes', client.download)
+
+	client.upload(filename, function onSeed(infhsh) {
 		timeSeeding = new Date().getTime()
 		var dur = (timeSeeding - timeStart) / 1000
 		t.pass('Seeding file #1, took ' + dur + ' seconds.')
@@ -27,11 +51,11 @@ test('ogg file', function (t) {
 	})
 
 	emitter.on('error', function er(err) {
-		t.fail('network error' + (err && err.message))
+		t.fail('network error ' + String(err))
 		end()
 	})
 
-	emitter.on('hashes', function ha(infoHashes) {
+	emitter.on('uploaded-hashes', function ha(infoHashes) {
 		var timeHashes = new Date().getTime()
 		var dur = (timeHashes - timeSeeding) / 1000
 
@@ -45,9 +69,7 @@ test('ogg file', function (t) {
 
 	function end() {
 		clearTimeout(timeout)
-		torrenters.forEach(function tfe2(torr) {
-			torr.destroy()
-		})
+		torrenter.destroy()
 		t.pass('ending')
 		t.end()
 	}
