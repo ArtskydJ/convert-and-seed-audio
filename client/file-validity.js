@@ -5,19 +5,15 @@ var MAX_MB = 15
 
 function invalid(meta) {
 	if (!meta) {
-		return new ReferenceError('Must supply a file, supplied ' + meta + '.')
-	} else if (!meta.size) {
-		return new ReferenceError('Supplied file does not have size attribute: ' + meta.size)
-	} else if (!meta.type) {
-		return new ReferenceError('Supplied file does not have type attribute: ' + meta.type)
+		return new Error('Must supply a file.')
 	} else if (typeof meta.size !== 'number') {
-		return new TypeError('Supplied file\'s size attribute is a ' + typeof size + ', but is expected to be a number.')
+		return new Error('Expected file size attribute to be a number.')
 	} else if (typeof meta.type !== 'string') {
-		return new TypeError('Supplied file\'s type attribute is a ' + typeof size + ', but is expected to be a string.')
+		return new Error('Expected file type attribute to be a string.')
 	} else if (meta.size > MAX_MB * MB) {
-		return new TypeError('Supplied file is ' + (meta.size / MB) + ' megabytes which is larger than the max of ' + MAX_MB + ' megabytes.')
-	} else if (meta.type.split('/')[0] !== 'audio') {
-		return new Error('Supplied file is a ' + meta.type.split('/')[0] + ' file, not an audio file.')
+		return new Error('Expected file is ' + (meta.size / MB) + 'mb. Max allowed is ' + MAX_MB + 'mb.')
+	} else if (meta.type.indexOf('audio') === 0) {
+		return new Error('Expected file is not an audio file.')
 	} else {
 		return null
 	}

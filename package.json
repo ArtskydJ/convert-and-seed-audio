@@ -25,7 +25,6 @@
   "dependencies": {
     "async-each": "^0.1.6",
     "create-temp-file": "^0.1.1",
-
     "emit-stream": "^0.1.2",
     "key-master": "^1.0.0",
     "shoe": "0.0.15",

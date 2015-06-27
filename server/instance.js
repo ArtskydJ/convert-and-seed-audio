@@ -11,14 +11,13 @@ require('string.prototype.endswith')
 module.exports = function Instance(torrenter) {
 	var emitter = new EventEmitter()
 
-	emitter.on('upload', function ul(infHsh) {
-		console.log('upload ' + infHsh)
-		torrenter.download(infHsh, webtorrentConfig, onTorrent(torrenter, function finished(err, bundle) {
-			console.log('upload done', err, bundle)
-			err ?
-				emitter.emit('error', err) :
-				emitter.emit('uploaded-bundle', bundle)
-		}))
+	function onFileUploaded(err, bundle) {
+		if (err) emitter.emit('error', err)
+		else emitter.emit('new-bundle', bundle)
+	}
+
+	emitter.on('upload-request', function ul(infHsh) {
+		torrenter.download(infHsh, webtorrentConfig, onTorrent(torrenter, onFileUploaded))
 	})
 
 	return emitter
@@ -26,7 +25,6 @@ module.exports = function Instance(torrenter) {
 
 function onTorrent(torrenter, cb) {
 	return function ot(torrent) {
-		console.log('on torrent')
 		var file = torrent.files[0]
 		if (file) {
 			each(extensions, seedConverted(torrenter, file, torrent.infoHash), function (err, hashes) {
@@ -51,11 +49,11 @@ function seedConverted(torrenter, file, infoHash) {
 		var doNotConvert = file.name.endsWith(desiredExtension)
 
 		if (doNotConvert) {
-			console.log(file.name + ' is already a ' + desiredExtension + ' file.')
+			// console.log(file.name + ' is already a ' + desiredExtension + ' file.')
 
 			next(null, infoHash)
 		} else {
-			console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
+			// console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
 
 			var convert = Sox({ type: desiredExtension })
 			var tmpFile = createTempFile()
