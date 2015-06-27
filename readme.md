@@ -57,7 +57,9 @@ Written for use with [browserify](https://github.com/substack/node-browserify).
 ## `upload(files, [cb])`
 
 - `files` is a file or an array of files.
-- `cb(infoHashes)`
+- `cb(err, infoHashes)`
+	- `err` is null or and Error object
+	- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
 
 # install
 

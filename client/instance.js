@@ -1,51 +1,12 @@
 var bestAudioFileType = require('./best-audio-node.js')
 var webtorrentConfig = require('../config.json').webtorrent
-var defaultValidFile = require('./file-validity.js').valid
+var defaultFileValidator = require('./file-validity.js').valid
+var each = require('async-each')
 
-module.exports = function instance(torrenter, emitter, customValidFile) {
-	var transfer = fileTransfer(torrenter, customValidFile || defaultValidFile)
-
-	emitter.on('uploaded-bundle', transfer.download)
-
-	return function upload(files, cb) {
-		transfer.upload(files, function (infoHash) {
-			emitter.emit('seeding', infoHash)
-			cb(infoHash) // this should be all the info hashes, not one at a time; this callback is called multiple times...
-		})
-	}
-}
-
-function fileTransfer(torrenter, validFile) {
+module.exports = function instance(torrenter, emitter, customFileValidator) {
+	var fileValidator = customFileValidator || defaultFileValidator
 	var storage = {}
 	var preferredFileType = bestAudioFileType()
-
-	function download(songBundles) {
-		console.log('DONWLODN:', songBundles)
-		ensureArray(songBundles).forEach(function dl(songBundle) {
-			console.log('song bundle:', songBundle)
-			var infoHash = songBundle[preferredFileType]
-			var id = songBundle
-			torrenter.download(infoHash, webtorrentConfig, saveSong(id))
-		})
-	}
-
-	function upload(files, cb) {
-		console.log('UPLAOD', files)
-		ensureArray(files).filter(validFile).forEach(function (file) { // use async each here!!!!!
-			torrenter.seed(file, function onseed(torrent) {
-				cb(torrent.infoHash)
-			})
-		})
-	}
-
-	function get(songId) {
-		return storage[songId]
-	}
-
-	function remove(songId) {
-		torrenter.remove(storage) // What?
-		return (delete storage[songId])
-	}
 
 	function saveSong(id) {
 		return function ontorrent(torrent) {
@@ -60,13 +21,51 @@ function fileTransfer(torrenter, validFile) {
 		}
 	}
 
+	function download(songBundles) {
+		// console.log('DONWLODN:', songBundles)
+		ensureArray(songBundles).forEach(function dl(songBundle) {
+			// console.log('song bundle:', songBundle)
+			var infoHash = songBundle[preferredFileType]
+			var id = songBundle
+			torrenter.add(infoHash, webtorrentConfig, saveSong(id))
+		})
+	}
+
+	emitter.on('new-bundle', download)
+
+	function uploadFile(file, next) {
+		torrenter.seed(file, function onseed(torrent) {
+			emitter.emit('upload-request', torrent.infoHash)
+			next(null, torrent.infoHash)
+		})
+	}
+
+	function upload(files, cb) {
+		// console.log('UPLAOD', files)
+		var validFiles = ensureArray(files).filter(fileValidator)
+		each(validFiles, uploadFile, cb)
+	}
+
+	return upload
+}
+
+	/*
+	function get(songId) {
+		return storage[songId]
+	}
+
+	function remove(songId) {
+		torrenter.remove(storage) // What?
+		return (delete storage[songId])
+	}
+
 	return {
 		download: download,
 		upload: upload,
 		get: get,
 		remove: remove
 	}
-}
+	*/
 
 function ensureArray(thing) {
 	return (Array.isArray(thing)) ? thing : [thing]
