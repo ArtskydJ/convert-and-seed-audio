@@ -3,10 +3,7 @@
   "version": "0.0.1",
   "description": "gets an audio file, and seeds alternative formats",
   "main": "./server/server.js",
-  "browser": {
-    "./client/best-audio-node.js": "./client/best-audio-browser.js",
-    "./server/server.js": "./client/client.js"
-  },
+  "browser":  "./client/client.js",
   "scripts": {
     "build": "browserify test/test.js -o test/testbundle.js",
     "test": "node test/test.js",
