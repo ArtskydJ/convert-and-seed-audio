@@ -1,13 +1,7 @@
 {
-	"ecstatic": {
-		"root": "/public",
-		"showDir": false,
-		"gzip": true
-	},
 	"webtorrent": {
-		"announce": ["wss://tracker.webtorrent.io"]
+		"announce": [ "wss://tracker.webtorrent.io" ]
 	},
-	"socketIoUrl": "http://localhost/socketio",
 	"extensions": [
 		"flac",
 		"ogg"
