@@ -17,7 +17,7 @@ module.exports = function setup(t) {
 		t.end()
 	}
 	emitter.on('error', end)
-	setTimeout(end, 60000, 'timeout').unref()
+	setTimeout(end, 100000, 'timeout').unref()
 
 	return {
 		emitter: emitter,
