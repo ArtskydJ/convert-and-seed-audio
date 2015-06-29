@@ -4,12 +4,12 @@
   "description": "gets an audio file, and seeds alternative formats",
   "main": "./server/server.js",
   "browser": {
-    "./server/server.js": "./client/client.js",
-    "./client/best-audio-node.js": "./client/best-audio-browser.js"
+    "./client/best-audio-node.js": "./client/best-audio-browser.js",
+    "./server/server.js": "./client/client.js"
   },
   "scripts": {
-    "test": "node test/test.js",
     "build": "browserify test/test.js -o test/testbundle.js",
+    "test": "node test/test.js",
     "watch": "watchify test/test.js -d -o test/testbundle.js"
   },
   "repository": {
@@ -26,11 +26,11 @@
     "async-each": "^0.1.6",
     "create-temp-file": "^0.1.1",
     "emit-stream": "^0.1.2",
-    "key-master": "^1.0.0",
+    "random-uuid-v4": "0.0.5",
     "shoe": "0.0.15",
     "sox-stream": "^1.0.0",
     "string.prototype.endswith": "^0.2.0",
-    "webtorrent": "^0.49.2"
+    "webtorrent": "^0.50.2"
   },
   "devDependencies": {
     "tape": "^4.0.0"
