@@ -3,6 +3,7 @@ var Sox = require('sox-stream')
 var path = require('path')
 var each = require('async-each')
 var createTempFile = require('create-temp-file')
+var uuid = require('random-uuid-v4')
 var cfg = require('../config.json')
 var extensions = cfg.extensions
 var webtorrentConfig = cfg.webtorrent
@@ -34,7 +35,7 @@ function onTorrent(torrenter, cb) {
 					var bundle = extensions.reduce(function (memo, curr, i) {
 						memo[curr] = hashes[i]
 						return memo
-					}, {})
+					}, { id: uuid() })
 					cb(null, bundle)
 				}
 			})

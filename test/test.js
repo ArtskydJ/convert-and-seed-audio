@@ -20,11 +20,12 @@ test('ogg file', function (t) {
 	})
 
 	state.emitter.on('new-bundle', function onbundle(bundle) {
-		var keys = Object.keys(bundle)
-		var hashes = keys.map(function (key) { return bundle[key] })
+		var hashes = Object.keys(bundle)
+			.filter(function (key) { return key !== 'id' })
+			.map(function (key) { return bundle[key] })
 
 		t.pass('uploaded ' + timeDiff() + ' sec')
-		t.equal(keys.length, 2, '2 info hashes returned')
+		t.equal(hashes.length, 2, '2 info hashes returned')
 
 		var msg = shorten(originalHash) + ' is in ' + hashes.map(shorten).join(', ')
 		t.notEqual(hashes.indexOf(originalHash), -1, msg)

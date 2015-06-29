@@ -9,7 +9,7 @@ function fileValidator(x) {
 module.exports = function setup(t) {
 	var torrenter = new WebTorrent()
 	var emitter = ServerInstance(torrenter)
-	var upload = ClientInstance(torrenter, emitter, fileValidator)
+	var client = ClientInstance(torrenter, emitter, fileValidator)
 
 	function end(err) {
 		torrenter.destroy()
@@ -21,7 +21,7 @@ module.exports = function setup(t) {
 
 	return {
 		emitter: emitter,
-		upload: upload,
+		upload: client.upload,
 		end: end.bind(null, null)
 	}
 }

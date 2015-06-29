@@ -8,26 +8,20 @@ module.exports = function instance(torrenter, emitter, customFileValidator) {
 	var storage = {}
 	var preferredFileType = bestAudioFileType()
 
-	function saveSong(id) {
-		return function ontorrent(torrent) {
-			var file = torrent.files[0]
-			if (process.browser) {
-				file.getBlobURL(function (err, url) {
-					storage[id] = url
-				})
-			} else {
-				storage[id] = file
-			}
-		}
-	}
-
 	function download(songBundles) {
-		// console.log('DONWLODN:', songBundles)
 		ensureArray(songBundles).forEach(function dl(songBundle) {
-			// console.log('song bundle:', songBundle)
 			var infoHash = songBundle[preferredFileType]
-			var id = songBundle
-			torrenter.add(infoHash, webtorrentConfig, saveSong(id))
+			var id = songBundle.id
+			torrenter.add(infoHash, webtorrentConfig, function ontorrent(torrent) {
+				var file = torrent.files[0]
+				if (process.browser) {
+					file.getBlobURL(function (err, url) {
+						storage[id] = url
+					})
+				} else {
+					storage[id] = file
+				}
+			})
 		})
 	}
 
@@ -41,22 +35,17 @@ module.exports = function instance(torrenter, emitter, customFileValidator) {
 	}
 
 	function upload(files, cb) {
-		// console.log('UPLAOD', files)
 		var validFiles = ensureArray(files).filter(fileValidator)
 		each(validFiles, uploadFile, cb)
 	}
 
-	return upload
-}
-
-	/*
-	function get(songId) {
-		return storage[songId]
+	function remove(songId) {
+		torrenter.remove(songId)
+		delete storage[songId]
 	}
 
-	function remove(songId) {
-		torrenter.remove(storage) // What?
-		return (delete storage[songId])
+	function get(songId) {
+		return storage[songId]
 	}
 
 	return {
@@ -65,7 +54,7 @@ module.exports = function instance(torrenter, emitter, customFileValidator) {
 		get: get,
 		remove: remove
 	}
-	*/
+}
 
 function ensureArray(thing) {
 	return (Array.isArray(thing)) ? thing : [thing]
