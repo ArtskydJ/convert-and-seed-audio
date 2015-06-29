@@ -9,8 +9,8 @@
 	},
 	"socketIoUrl": "http://localhost/socketio",
 	"extensions": [
-		"mp3",
+		"flac",
 		"ogg"
 	],
-	"defaultExtension": "mp3"
+	"defaultExtension": "flac"
 }
