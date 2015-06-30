@@ -1,6 +1,5 @@
 var Instance = require('./instance.js')
 var shoe = require('shoe')
-var http = require('http')
 var emitStream = require('emit-stream')
 var JSONStream = require('JSONStream')
 try {
@@ -12,10 +11,10 @@ try {
 var WebTorrent = require('webtorrent')
 
 module.exports = function casa(server) {
-	if (!server) server = http.createServer()
+	if (!server) throw new Error('Expected a server object')
 	var emitter = Instance(new WebTorrent())
 	shoe(function (stream) {
 		emitStream(emitter).pipe(JSONStream.stringify()).pipe(stream)
 	}).install(server, '/socket')
-	return server
+	return emitter
 }
