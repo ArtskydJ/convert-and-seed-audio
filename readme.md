@@ -10,10 +10,11 @@ convert-and-seed-audio
 *server.js*
 
 ```js
-var createServer = require('convert-and-seed-audio')
+var casa = require('convert-and-seed-audio')
 var ecstatic = require('ecstatic')
 
-var server = createServer(ecstatic(__dirname))
+var server = http.createServer(ecstatic(__dirname))
+casa(server)
 server.listen(8080)
 ```
 
@@ -33,16 +34,31 @@ dragDrop('body', function (files) {
 # server api
 
 ```js
-var createServer = require('convert-and-seed-audio')
+var casa = require('convert-and-seed-audio')
 ```
 
-## `var server = createServer([requestListener])`
+## `var emitter = casa(server)`
 
-`createServer` is like [`http.createServer`](https://nodejs.org/api/http.html#http_http_createserver_requestlistener)
+- `server` is an [`http.Server`](https://nodejs.org/api/http.html#http_class_http_server) instance. You have to call `server.listen()`.
+- `emitter` is an `events.EventEmitter` instance. You can call `emitter.on`, if you want.
 
-## `server`
+## events
 
-`server` is an instance of [`http.Server`](https://nodejs.org/api/http.html#http_class_http_server). You have to call `server.listen()`.
+- `error` (err)
+- `upload-request` (infoHash)
+- `new-bundle` (bundle)
+
+###### song bundle object
+
+A song bundle object looks like this:
+
+```js
+{
+	id: '33AE0D80-1ED6-11E5-BE44-7C65CDAD1E06', // uuid
+	ogg: '397321422a00076e15dd77dc9516fee37ecdfdef', // info hash
+	flac: 'cafc3eba9c2062571430ce428d0c0934c42a0215' // info hash
+}
+```
 
 # browser api
 
@@ -52,14 +68,31 @@ var createClient = require('convert-and-seed-audio')
 
 Written for use with [browserify](https://github.com/substack/node-browserify).
 
-## `var upload = createClient()`
+## `var client = createClient()`
 
-## `upload(files, [cb])`
+### `client.upload(files, [cb])`
 
-- `files` is a file or an array of files.
-- `cb(err, infoHashes)`
-	- `err` is null or and Error object
-	- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
+`files` is a file or an array of files.
+
+`cb(err, infoHashes)`
+- `err` is null or and Error object
+- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
+
+
+### `client.download(songBundles)`
+
+`songBundles` is an array of song bundles, or a song bundle.
+
+### `client.remove(songId)`
+
+`songId` is the id of the song bundle to remove.
+
+### `var songBundle = client.get(songId)`
+
+`songId` is the id of the song bundle to return.
+
+Returns `songBundle`.
+
 
 # install
 
