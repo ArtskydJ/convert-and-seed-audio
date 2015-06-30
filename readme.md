@@ -11,6 +11,7 @@ convert-and-seed-audio
 
 ```js
 var casa = require('convert-and-seed-audio')
+var http = require('http')
 var ecstatic = require('ecstatic')
 
 var server = http.createServer(ecstatic(__dirname))
@@ -24,10 +25,10 @@ server.listen(8080)
 var createClient = require('convert-and-seed-audio')
 var dragDrop = require('drag-drop/buffer')
 
-var upload = createClient()
+var client = createClient()
 
 dragDrop('body', function (files) {
-	upload(files)
+	client.upload(files)
 })
 ```
 
@@ -72,26 +73,24 @@ Written for use with [browserify](https://github.com/substack/node-browserify).
 
 ### `client.upload(files, [cb])`
 
-`files` is a file or an array of files.
-
-`cb(err, infoHashes)`
-- `err` is null or and Error object
-- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
+- `files` is a file or an array of files.
+- `cb(err, infoHashes)`
+	- `err` is null or and Error object
+	- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
 
 
 ### `client.download(songBundles)`
 
-`songBundles` is an array of song bundles, or a song bundle.
+- `songBundles` is an array of song bundles, or a song bundle.
 
 ### `client.remove(songId)`
 
-`songId` is the id of the song bundle to remove.
+- `songId` is the id of the song bundle to remove.
 
 ### `var songBundle = client.get(songId)`
 
-`songId` is the id of the song bundle to return.
-
-Returns `songBundle`.
+- `songId` is the id of the song bundle to return.
+- Returns `songBundle`.
 
 
 # install
