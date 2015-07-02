@@ -21,7 +21,7 @@
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
     "async-each": "^0.1.6",
-    "create-temp-file": "^0.1.1",
+    "create-temp-file": "^0.2.2",
     "emit-stream": "^0.1.2",
     "random-uuid-v4": "0.0.5",
     "shoe": "0.0.15",
