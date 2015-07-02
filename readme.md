@@ -41,7 +41,7 @@ var casa = require('convert-and-seed-audio')
 ## `var emitter = casa(server)`
 
 - `server` is an [`http.Server`](https://nodejs.org/api/http.html#http_class_http_server) instance. You have to call `server.listen()`.
-- `emitter` is an `events.EventEmitter` instance. You can call `emitter.on`, if you want.
+- `emitter` is an [`events.EventEmitter`](https://nodejs.org/api/events.html#events_class_events_eventemitter) instance. You can call `emitter.on`, if you want.
 
 ## events
 
