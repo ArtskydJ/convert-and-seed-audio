@@ -50,17 +50,10 @@ function seedConverted(torrenter, file, infoHash) {
 		var doNotConvert = file.name.endsWith(desiredExtension)
 
 		if (doNotConvert) {
-			// console.log(file.name + ' is already a ' + desiredExtension + ' file.')
-
 			next(null, infoHash)
 		} else {
-			// console.log('Converting ' + file.name + ' to a ' + desiredExtension + ' file.')
-
 			var convert = Sox({ type: desiredExtension })
 			var tmpFile = createTempFile(desiredExtension)
-
-			// use require('sox.js'), file.path, and require('tempfile')
-			//instead of require('create-temp-file') and require('sox-stream')
 			file.createReadStream()
 				.pipe(convert)
 				.pipe(tmpFile)
