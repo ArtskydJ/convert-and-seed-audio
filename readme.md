@@ -4,6 +4,7 @@ convert-and-seed-audio
 [![Build Status](https://travis-ci.org/ArtskydJ/convert-and-seed-audio.svg)](https://travis-ci.org/ArtskydJ/convert-and-seed-audio)
 [![Dependency Status](https://david-dm.org/artskydj/convert-and-seed-audio.svg)](https://david-dm.org/artskydj/convert-and-seed-audio)
 [![devDependency Status](https://david-dm.org/artskydj/convert-and-seed-audio/dev-status.svg)](https://david-dm.org/artskydj/convert-and-seed-audio#info=devDependencies)
+[![optionalDependency Status](https://david-dm.org/artskydj/convert-and-seed-audio/optional-status.svg)](https://david-dm.org/artskydj/convert-and-seed-audio#info=optionalDependencies)
 
 # example
 
