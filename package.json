@@ -4,8 +4,8 @@
   "description": "gets an audio file, and seeds alternative formats",
   "main": "server/server.js",
   "browser": {
-    "server/server.js": "client/client.js",
-    "server/instance.js": "client/emitter.js"
+    "./server/server.js": "./client/client.js",
+    "./server/instance.js": "./client/emitter.js"
   },
   "scripts": {
     "build": "browserify test/test.js -o test/testbundle.js",
