@@ -1,12 +1,10 @@
 var WebTorrent = require('webtorrent')
-var shoe = require('shoe')
-var emitStream = require('emit-stream')
-var JSONStream = require('JSONStream')
+var Emitter = require('./emitter.js')
 var ClientInstance = require('./instance.js')
 
-module.exports = function client()
+// No way to do torrenter.destroy()
+module.exports = function Client() {
 	var torrenter = new WebTorrent()
-	var stream = shoe('/socket').pipe(JSONStream.parse([true]))
-	var emitter = emitStream(stream)
+	var emitter = Emitter()
 	return ClientInstance(torrenter, emitter)
 }

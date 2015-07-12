@@ -2,14 +2,10 @@ var WebTorrent = require('webtorrent')
 var ClientInstance = require('../../client/instance.js')
 var ServerInstance = require('../../server/instance.js')
 
-function fileValidator(x) {
-	return typeof x === 'string'
-}
-
 module.exports = function setup(t) {
 	var torrenter = new WebTorrent()
 	var emitter = ServerInstance(torrenter)
-	var client = ClientInstance(torrenter, emitter, fileValidator)
+	var client = ClientInstance(torrenter, emitter, Boolean)
 
 	function end(err) {
 		torrenter.destroy()
@@ -17,7 +13,8 @@ module.exports = function setup(t) {
 		t.end()
 	}
 	emitter.on('error', end)
-	setTimeout(end, 100000, 'timeout').unref()
+	var to = setTimeout(end, 100000, 'timeout')
+	to.unref && to.unref()
 
 	return {
 		emitter: emitter,

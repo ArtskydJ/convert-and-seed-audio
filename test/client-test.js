@@ -1,4 +1,5 @@
 var test = require('tape')
+var fs = require('fs')
 var setup = require('./helpers/setup.js')
 var timer = require('./helpers/timer.js')
 
@@ -9,10 +10,11 @@ function shorten(s) {
 test('ogg file', function (t) {
 	var state = setup(t)
 	var timeDiff = timer()
-	var filename = __dirname + '/audio/test_1.ogg'
 	var originalHash = null
+	var fileBuffer = fs.readFileSync(__dirname + '/audio/test_1.ogg')
+	fileBuffer.name = 'test_1.ogg'
 
-	state.upload(filename, function onSeed(err, infoHashes) {
+	state.upload(fileBuffer, function onSeed(err, infoHashes) {
 		var infoHash = infoHashes[0]
 		t.equal(infoHashes.length, 1, 'recieved an array of one info hash')
 		t.pass('seeding ' + shorten(infoHash) + ': ' + timeDiff() + ' sec')

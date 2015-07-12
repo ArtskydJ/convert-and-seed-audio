@@ -2,11 +2,15 @@
   "name": "convert-and-seed-audio",
   "version": "0.0.1",
   "description": "gets an audio file, and seeds alternative formats",
-  "main": "./server/server.js",
-  "browser": "./client/client.js",
+  "main": "server/server.js",
+  "browser": {
+    "server/server.js": "client/client.js",
+    "server/instance.js": "client/emitter.js"
+  },
   "scripts": {
     "build": "browserify test/test.js -o test/testbundle.js",
-    "test": "node test/test.js",
+    "test": "node test/client-test.js",
+    "test2": "node server/server.js | browserify test/client-test.js -t brfs | smokestack",
     "watch": "watchify test/test.js -d -o test/testbundle.js"
   },
   "repository": {
@@ -20,6 +24,7 @@
   },
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
+    "JSONStream": "^1.0.4",
     "async-each": "^0.1.6",
     "create-temp-file": "^1.0.0",
     "emit-stream": "^0.1.2",
@@ -30,7 +35,11 @@
     "webtorrent": "^0.50.2"
   },
   "devDependencies": {
-    "tape": "^4.0.0"
+    "brfs": "^1.4.0",
+    "browserify": "^10.2.6",
+    "smokestack": "^3.3.0",
+    "tape": "^4.0.0",
+    "watchify": "^3.2.3"
   },
   "optionalDependencies": {
     "wrtc": "^0.0.56"

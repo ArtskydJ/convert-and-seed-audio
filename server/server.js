@@ -10,9 +10,11 @@ try {
 }
 var WebTorrent = require('webtorrent')
 
+// No way to do torrenter.destroy()
 module.exports = function casa(server) {
 	if (!server) throw new Error('Expected a server object')
-	var emitter = Instance(new WebTorrent())
+	var torrenter = new WebTorrent()
+	var emitter = Instance(torrenter)
 	shoe(function (stream) {
 		emitStream(emitter).pipe(JSONStream.stringify()).pipe(stream)
 	}).install(server, '/socket')
