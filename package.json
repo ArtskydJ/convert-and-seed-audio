@@ -10,7 +10,7 @@
   "scripts": {
     "build": "browserify test/test.js -o test/testbundle.js",
     "test2": "node test/client-test.js",
-    "test": "node server/server.js | browserify test/client-test.js -t brfs | smokestack",
+    "test": "node server/server.js | browserify test/client-test.js -t brfs | smokestack -b firefox",
     "watch": "watchify test/test.js -d -o test/testbundle.js"
   },
   "repository": {
