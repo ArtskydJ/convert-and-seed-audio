@@ -1,15 +1,12 @@
-var bestAudioFileType = require('./best-audio.js')
+var supportedAudio = require('supported-audio')
 var config = require('../config.json')
-var extensions = config.extensions
-var defaultExtension = config.defaultExtension
-var webtorrentConfig = config.webtorrent
 var defaultFileValidator = require('./file-validity.js').valid
 var each = require('async-each')
 
 module.exports = function instance(torrenter, emitter, customFileValidator) {
 	var fileValidator = customFileValidator || defaultFileValidator
 	var storage = {}
-	var preferredFileType = bestAudioFileType(extensions, defaultExtension)
+	var preferredFileType = supportedAudio(config.extensions) || config.defaultExtension
 
 	function download(songBundles) {
 		ensureArray(songBundles).forEach(function dl(songBundle) {

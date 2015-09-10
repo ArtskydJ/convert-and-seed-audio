@@ -6,10 +6,9 @@ var createTempFile = require('create-temp-file')()
 var uuid = require('random-uuid-v4')
 var cfg = require('../config.json')
 var extensions = cfg.extensions
-var webtorrentConfig = cfg.webtorrent
 require('string.prototype.endswith')
 
-module.exports = function Instance(torrenter) {
+module.exports = function Instance(emitter, filesStream) {
 	var emitter = new EventEmitter()
 
 	function onFileUploaded(err, bundle) {

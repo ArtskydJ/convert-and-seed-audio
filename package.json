@@ -28,11 +28,12 @@
     "async-each": "^0.1.6",
     "create-temp-file": "^1.0.0",
     "emit-stream": "^0.1.2",
+    "multiplex": "^6.2.2",
     "random-uuid-v4": "0.0.5",
     "shoe": "0.0.15",
     "sox-stream": "^1.0.2",
     "string.prototype.endswith": "^0.2.0",
-    "webtorrent": "^0.53.3"
+    "supported-audio": "^1.0.1"
   },
   "devDependencies": {
     "brfs": "^1.4.0",
@@ -41,7 +42,5 @@
     "tape": "^4.0.0",
     "watchify": "^3.2.3"
   },
-  "optionalDependencies": {
-    "wrtc": "^0.0.56"
-  }
+  "optionalDependencies": {}
 }

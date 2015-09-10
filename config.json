@@ -1,7 +1,4 @@
 {
-	"webtorrent": {
-		"announce": [ "wss://tracker.webtorrent.io" ]
-	},
 	"extensions": [
 		"flac",
 		"ogg"
