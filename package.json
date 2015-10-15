@@ -24,14 +24,11 @@
   },
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
-    "JSONStream": "^1.0.4",
     "async-each": "^0.1.6",
     "busboy": "^0.2.11",
     "create-temp-file": "^1.0.0",
-    "emit-stream": "^0.1.2",
-    "shoe": "0.0.15",
     "sox-stream": "^1.0.2",
-    "webtorrent": "^0.53.3"
+    "webtorrent": "^0.62.2"
   },
   "devDependencies": {
     "brfs": "^1.4.0",
