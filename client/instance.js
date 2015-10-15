@@ -1,28 +1,20 @@
-var bestAudioFileType = require('./best-audio.js')
-var config = require('../config.json')
-var extensions = config.extensions
-var defaultExtension = config.defaultExtension
-var webtorrentConfig = config.webtorrent
 var defaultFileValidator = require('./file-validity.js').valid
 var each = require('async-each')
 
 module.exports = function instance(torrenter, emitter, customFileValidator) {
 	var fileValidator = customFileValidator || defaultFileValidator
 	var storage = {}
-	var preferredFileType = bestAudioFileType(extensions, defaultExtension)
 
-	function download(songBundles) {
-		ensureArray(songBundles).forEach(function dl(songBundle) {
-			var infoHash = songBundle[preferredFileType]
-			var id = songBundle.id
-			torrenter.add(infoHash, webtorrentConfig, function ontorrent(torrent) {
+	function download(infoHashes) {
+		ensureArray(infoHashes).forEach(function dl(infoHash) {
+			torrenter.add(infoHash, { announce: [ 'wss://tracker.webtorrent.io' ] }, function ontorrent(torrent) {
 				var file = torrent.files[0]
 				if (process.browser) {
 					file.getBlobURL(function (err, url) {
-						storage[id] = url
+						storage[infoHash] = url
 					})
 				} else {
-					storage[id] = file
+					storage[infoHash] = file
 				}
 			})
 		})
@@ -42,13 +34,13 @@ module.exports = function instance(torrenter, emitter, customFileValidator) {
 		each(validFiles, uploadFile, cb)
 	}
 
-	function remove(songId) {
-		torrenter.remove(songId)
-		delete storage[songId]
+	function remove(infoHash) {
+		torrenter.remove(infoHash)
+		delete storage[infoHash]
 	}
 
-	function get(songId) {
-		return storage[songId]
+	function get(infoHash) {
+		return storage[infoHash]
 	}
 
 	return {

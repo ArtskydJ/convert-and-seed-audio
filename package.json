@@ -26,12 +26,11 @@
   "dependencies": {
     "JSONStream": "^1.0.4",
     "async-each": "^0.1.6",
+    "busboy": "^0.2.11",
     "create-temp-file": "^1.0.0",
     "emit-stream": "^0.1.2",
-    "random-uuid-v4": "0.0.5",
     "shoe": "0.0.15",
     "sox-stream": "^1.0.2",
-    "string.prototype.endswith": "^0.2.0",
     "webtorrent": "^0.53.3"
   },
   "devDependencies": {

@@ -50,18 +50,6 @@ var casa = require('convert-and-seed-audio')
 - `upload-request` (infoHash)
 - `new-bundle` (bundle)
 
-###### song bundle object
-
-A song bundle object looks like this:
-
-```js
-{
-	id: '33AE0D80-1ED6-11E5-BE44-7C65CDAD1E06', // uuid
-	ogg: '397321422a00076e15dd77dc9516fee37ecdfdef', // info hash
-	flac: 'cafc3eba9c2062571430ce428d0c0934c42a0215' // info hash
-}
-```
-
 # browser api
 
 ```js
