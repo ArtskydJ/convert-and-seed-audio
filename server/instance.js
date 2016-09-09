@@ -11,15 +11,16 @@ module.exports = function Instance() {
 }
 
 function onRequest(emitter, req, res) {
-	if (req.method === 'POST' && req.url = '/upload') {
-		var busboy = new Busboy({ headers: req.headers })
 
-		function onFinish() {
-			// This function is called too many places. Wrap it with `after`?
-			// This function is called on convert and not convert... WAT
-			res.writeHead(200, { 'Connection': 'close' })
-			res.end()
-		}
+	function onFinish() {
+		// This function is called too many places. Wrap it with `after`?
+		// This function is called on convert and not convert... WAT
+		res.writeHead(200, { 'Connection': 'close' })
+		res.end()
+	}
+
+	if (req.method === 'POST' && req.url === '/upload') {
+		var busboy = new Busboy({ headers: req.headers })
 
 		busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
 			var alreadyMp3 = fieldname.slice(-4) === '.mp3'

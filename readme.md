@@ -1,3 +1,5 @@
+get sox-server working beforeyou work more on this...
+
 convert-and-seed-audio
 ==========
 
@@ -63,9 +65,8 @@ Written for use with [browserify](https://github.com/substack/node-browserify).
 ### `client.upload(files, [cb])`
 
 - `files` is a file or an array of files.
-- `cb(err, infoHashes)`
+- `cb(err)`
 	- `err` is null or an Error object
-	- `infoHashes` is an array of info hashes. If you uploaded one file, it is an array of one info hash.
 
 
 ### `client.download(songBundles)`

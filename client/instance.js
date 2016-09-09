@@ -1,8 +1,9 @@
 var defaultFileValidator = require('./file-validity.js').valid
 var each = require('async-each')
-var Upload = require('upload-component-browserify')
+var Upload = require('./node-upload.js') // 'upload-component-browserify' in the browser
 
-module.exports = function instance(torrenter, customFileValidator) {
+module.exports = function instance(torrenter, emitter, customFileValidator) {
+	// why does it get an emitter???
 	var fileValidator = customFileValidator || defaultFileValidator
 	var storage = {}
 
@@ -25,7 +26,10 @@ module.exports = function instance(torrenter, customFileValidator) {
 		var validFiles = ensureArray(files).filter(fileValidator)
 
 		each(validFiles, function uploadFile(file, next) {
-			new Upload(file).to('/upload', next)
+			new Upload(file).to('/upload', function (err, res) {
+				if (!err) file = res
+				torrenter.seed(file)
+			})
 		}, cb)
 	}
 

@@ -1,11 +1,16 @@
 var WebTorrent = require('webtorrent')
+var http = require('http')
 var ClientInstance = require('../../client/instance.js')
 var ServerInstance = require('../../server/instance.js')
 
 module.exports = function setup(t) {
 	var torrenter = new WebTorrent()
-	var emitter = ServerInstance(torrenter)
+	var server = ServerInstance(torrenter)
+	var emitter = server.emitter
 	var client = ClientInstance(torrenter, emitter, Boolean)
+
+	var listener = http.createServer(server.onRequest)
+	listener.listen(8080)
 
 	function end(err) {
 		torrenter.destroy()
@@ -14,7 +19,7 @@ module.exports = function setup(t) {
 	}
 	emitter.on('error', end)
 	var to = setTimeout(end, 100000, 'timeout')
-	to.unref && to.unref()
+	if (to.unref) to.unref()
 
 	return {
 		emitter: emitter,

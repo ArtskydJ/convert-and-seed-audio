@@ -5,12 +5,13 @@
   "main": "server/server.js",
   "browser": {
     "./server/server.js": "./client/client.js",
-    "./server/instance.js": "./client/emitter.js"
+    "./server/instance.js": "./client/emitter.js",
+    "./client/node-upload.js": "upload-component-browserify"
   },
   "scripts": {
     "build": "browserify test/test.js -o test/testbundle.js",
     "test2": "node test/client-test.js",
-    "test": "node server/server.js | browserify test/client-test.js -t brfs | smokestack -b firefox",
+    "test": "node server/server.js | browserify test/client-test.js -d -t brfs | smokestack -b chrome",
     "watch": "watchify test/test.js -d -o test/testbundle.js"
   },
   "repository": {
@@ -24,9 +25,12 @@
   },
   "homepage": "https://github.com/ArtskydJ/convert-and-seed-audio",
   "dependencies": {
+    "JSONStream": "^1.0.7",
     "async-each": "^0.1.6",
     "busboy": "^0.2.11",
     "create-temp-file": "^1.0.0",
+    "emit-stream": "^0.1.2",
+    "shoe": "0.0.15",
     "sox-stream": "^1.0.2",
     "webtorrent": "^0.62.2"
   },

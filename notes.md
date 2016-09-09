@@ -1,3 +1,5 @@
+get sox-server working beforeyou work more on this...
+
 # client:
 
 - when they submit a song
